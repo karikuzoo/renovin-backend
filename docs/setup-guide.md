@@ -57,7 +57,7 @@ renovin-android ───────┘   (Singapore)        ├─► Realtime
 | 7 migration + seed diterapkan ke `renovin-dev` | ✅ PR [karikuzoo/renovin-backend#1](https://github.com/karikuzoo/renovin-backend/pull/1) |
 | `types/database.types.ts` ter-generate | ✅ |
 | Server Express lama dihapus | ✅ |
-| Edge function `imagekit-auth` di-deploy + secret ImageKit | ⏳ Menunggu key ImageKit |
+| Edge function `imagekit-auth` di-deploy + secret ImageKit | ✅ Live di `renovin-dev` (5 Okt 2026). Penolakan tanpa login dan CORS sudah dites; upload sukses belum dites dari web |
 | Signed URL untuk foto private (ImageKit) | ⏳ Belum dibuat |
 | Notifikasi WhatsApp | ⏳ Menunggu pilihan provider |
 | Konfirmasi asumsi ke client ([decisions.md](decisions.md)) | ⏳ |
@@ -97,7 +97,7 @@ git config --global core.autocrlf true
 |---|---|---|
 | **GitHub** | `karikuzoo` (repo backend, web, android) | Ihsan, Rivaldy |
 | **Supabase** | Org *Swandaa Org* (Free) → project `renovin-dev` | Ihsan (owner). Rivaldy opsional, role *Read-only* / *Developer* |
-| **ImageKit** | Penyimpanan file | Pemilik akun memegang private key |
+| **ImageKit** | ID `msyhbdl24`, endpoint `https://ik.imagekit.io/msyhbdl24`. Key: `supabase-renovin-dev` | Ihsan (pemegang private key) |
 | **Hosting web** | Vercel / Netlify / Cloudflare (belum dipilih) | Rivaldy |
 
 ### Apa yang dibagikan ke siapa
@@ -209,18 +209,41 @@ Aturan migration:
 3. Perubahan harus **backward compatible**. Tambah kolom boleh, hapus atau ganti nama kolom menunggu Android versi lama tidak dipakai.
 4. **RLS aktif** di setiap tabel baru, dengan policy select/insert/update/delete sesuai role.
 
-### Edge function ImageKit (belum di-deploy)
+### Edge function ImageKit
 
-```bash
-cp supabase/functions/.env.example supabase/functions/.env
-```
+Sudah di-deploy ke `renovin-dev`. Hasil tes:
 
-Isi `IMAGEKIT_*` dan `ALLOWED_ORIGINS` (URL web dev dan production dari Rivaldy), lalu:
+| Tes | Hasil |
+|---|---|
+| Tanpa header `Authorization` | `401` |
+| Token palsu | `401 Invalid JWT` (ditolak gateway Supabase) |
+| Preflight CORS dari `http://localhost:3000` | `Access-Control-Allow-Origin: http://localhost:3000` |
+| Preflight CORS dari origin lain | Tanpa header `Allow-Origin`, jadi diblokir browser |
+
+Secret yang terpasang: `IMAGEKIT_PUBLIC_KEY`, `IMAGEKIT_PRIVATE_KEY`, `IMAGEKIT_URL_ENDPOINT`, `IMAGEKIT_ROOT_FOLDER` (`/renovin/dev`), dan `ALLOWED_ORIGINS` (`http://localhost:3000`).
+
+**Setup ulang di laptop lain:** salin `supabase/functions/.env.example` menjadi `supabase/functions/.env`, lalu isi nilainya dari password manager.
+
+**Mengubah secret** (misalnya menambah domain production web ke `ALLOWED_ORIGINS`, dipisah koma): edit `supabase/functions/.env`, lalu jalankan:
 
 ```bash
 npm run secrets:set
-npm run functions:deploy
 ```
+
+Tidak perlu deploy ulang. Deploy ulang (`npm run functions:deploy`) hanya diperlukan kalau **kode** di `supabase/functions/` berubah.
+
+**Cek tanpa login** (harus `401`):
+
+```bash
+curl -i https://yblaopjkopdrrnwrxgqt.supabase.co/functions/v1/imagekit-auth
+```
+
+**Rotasi key ImageKit** (kalau bocor, atau ada anggota tim yang keluar):
+1. Dashboard ImageKit → Developer options → API keys → **Roll API keys**. Pilih masa tenggang terpendek.
+2. Isi key baru ke `supabase/functions/.env`, lalu `npm run secrets:set`.
+3. **Jangan pernah** mengirim screenshot yang menampilkan private key. Kalau terpaksa, crop bagian itu, jangan dicoret.
+
+Untuk `renovin-prod` nanti, buat **key ImageKit terpisah** (`supabase-renovin-prod`) dengan `IMAGEKIT_ROOT_FOLDER=/renovin/prod`.
 
 ### Akun uji (seed, khusus dev)
 
@@ -317,6 +340,29 @@ Setelah login, panggil `supabase.rpc('my_role')`. Kalau hasilnya `customer`, lan
 | Upload gambar | `supabase.functions.invoke('imagekit-auth')` untuk mendapatkan `token`, `expire`, `signature`, `publicKey`, `folder`, lalu upload ke ImageKit dan simpan `file_id` + URL ke tabel |
 | Laporan PDF | Route Handler membaca `rab_snapshots.data`, membuat PDF, upload ke ImageKit, lalu upsert `reports` (`on conflict snapshot_id`), dan terakhir `change_project_status(..., 'report_generated')` |
 
+Contoh upload gambar dari web:
+
+```ts
+const { data: auth, error } = await supabase.functions.invoke('imagekit-auth')
+if (error) throw error
+
+const form = new FormData()
+form.append('file', file)
+form.append('fileName', file.name)
+form.append('publicKey', auth.publicKey)
+form.append('signature', auth.signature)
+form.append('expire', String(auth.expire))
+form.append('token', auth.token)
+form.append('folder', `${auth.folder}/catalog`)
+
+const res = await fetch('https://upload.imagekit.io/api/v1/files/upload', { method: 'POST', body: form })
+const uploaded = await res.json()   // simpan uploaded.fileId & uploaded.url ke tabel
+```
+
+- Satu token hanya berlaku untuk **satu upload** dan kedaluwarsa dalam 30 menit. Panggil `imagekit-auth` lagi untuk setiap file.
+- Simpan `fileId` (ke kolom `*_file_id`) dan `url` (ke kolom `*_url`). `fileId` diperlukan untuk menghapus atau mengganti file nanti.
+- Kalau ImageKit menolak signature, kabari backend.
+
 Error dari RPC berupa pesan bahasa Indonesia (misalnya "RAB belum dihitung atau masih kosong"), jadi bisa langsung ditampilkan di toast.
 
 ### 7.6 Struktur halaman (FSD §10.2 & §10.3)
@@ -370,13 +416,13 @@ Issue fitur ──► Backend: migration → PR → review → merge → db push
 | # | Fitur | Backend | Web | Ref FSD |
 |---|---|---|---|---|
 | 1 | Login & layout | ✅ siap | Login, proxy, layout, tolak customer | §5 |
-| 2 | Katalog | ✅ data siap · ⏳ upload gambar butuh `imagekit-auth` | CRUD produk, harga internal, aktif/nonaktif | FS-15 |
+| 2 | Katalog | ✅ data + upload gambar (`imagekit-auth`) | CRUD produk, harga internal, aktif/nonaktif | FS-15 |
 | 3 | Tarif & pajak | ✅ | Halaman pengaturan | §7 |
 | 4 | Daftar & detail project | ✅ (seed P1–P5) | Daftar per status, before/after, timeline | FS-08 |
 | 5 | Workflow status | ✅ `change_project_status` + notifikasi | Tombol aksi sesuai status & role | §8 |
 | 6 | RAB draft & koreksi | ✅ `calculate_rab` + audit | Halaman RAB, edit baris, adjustment | FS-09, FS-11 |
 | 7 | Approval super admin | ✅ | Antrean + Approve/Correction/Reject (catatan wajib) | FS-10 |
-| 8 | Confirm final & PDF | ✅ snapshot · ⏳ upload PDF butuh `imagekit-auth` | Confirm, generate PDF, download | FS-12, FS-13 |
+| 8 | Confirm final & PDF | ✅ snapshot + upload PDF (`imagekit-auth`) | Confirm, generate PDF, download | FS-12, FS-13 |
 | 9 | Chat | ✅ in-app · ⏳ WhatsApp | Daftar percakapan + pesan realtime | FS-14 |
 
 ---
@@ -454,13 +500,13 @@ Deploy ke prod tetap **manual**, mengikuti urutan rilis di dokumen Stack: backen
 - [ ] Rivaldy mendapat Project URL + publishable key
 - [ ] Rivaldy diundang ke Supabase org (opsional, role terbatas)
 - [ ] Password DB tersimpan di password manager
-- [ ] Akun ImageKit + key tersimpan
+- [x] Akun ImageKit + key tersimpan
 - [ ] Hosting web dipilih
 
 **Backend**
 - [x] Migration + seed di `renovin-dev`
 - [x] Tipe database ter-generate
-- [ ] `imagekit-auth` di-deploy + secret diset
+- [x] `imagekit-auth` di-deploy + secret diset
 - [ ] CI migration di GitHub Actions
 - [ ] Signed URL foto private
 
@@ -468,6 +514,7 @@ Deploy ke prod tetap **manual**, mengikuti urutan rilis di dokumen Stack: backen
 - [ ] Next.js + shadcn jalan di `localhost:3000`
 - [ ] Login admin berhasil, customer ditolak
 - [ ] Tipe database disalin dari backend
+- [ ] Upload gambar katalog via `imagekit-auth` berhasil (tes pertama dengan user login)
 - [ ] CI build
 
 **Keputusan**
