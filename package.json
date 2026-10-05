@@ -1,24 +1,21 @@
 {
   "name": "renovin-backend",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "type": "module",
+  "description": "Konfigurasi Supabase untuk Renovin: migration, RLS, seed, edge functions",
   "scripts": {
-    "start": "node index.js",
-    "dev": "nodemon index.js"
+    "migration:new": "supabase migration new",
+    "migration:list": "supabase migration list",
+    "push:dev": "supabase db push",
+    "push:dev:seed": "supabase db push --include-seed",
+    "types": "supabase gen types --lang typescript --linked --schema public > types/database.types.ts",
+    "functions:deploy": "supabase functions deploy --use-api",
+    "secrets:set": "supabase secrets set --env-file supabase/functions/.env"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "dependencies": {
-    "@supabase/supabase-js": "^2.117.2",
-    "cors": "^2.8.6",
-    "dotenv": "^18.0.5",
-    "express": "^5.2.1",
-    "imagekit": "^6.0.0"
-  },
   "devDependencies": {
-    "nodemon": "^3.1.14"
-  }
+    "supabase": "^2.119.0"
+  },
+  "private": true
 }
