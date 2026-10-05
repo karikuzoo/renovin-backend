@@ -85,7 +85,15 @@ Deno.serve(async (req) => {
   const expire = Math.floor(Date.now() / 1000) + TOKEN_TTL_SECONDS;
   const signature = await hmacSha1Hex(privateKey, token + expire);
 
-  const rootFolder = Deno.env.get('IMAGEKIT_ROOT_FOLDER') ?? '/renovin';
+  const rootFolder = (Deno.env.get('IMAGEKIT_ROOT_FOLDER') ?? '/renovin').replace(/\/+$/, '');
+
+  // Folder yang disarankan per jenis file. Catatan: ImageKit tidak memaksa
+  // folder lewat token, jadi ini konvensi, bukan batasan keamanan.
+  const folders = {
+    catalog: `${rootFolder}/catalog`, // gambar & aset produk (web admin)
+    reports: `${rootFolder}/reports`, // PDF laporan final (web admin)
+    user: `${rootFolder}/users/${user.id}`, // file milik user ini, mis. foto ruangan (android)
+  };
 
   return json(req, {
     token,
@@ -93,8 +101,7 @@ Deno.serve(async (req) => {
     signature,
     publicKey,
     urlEndpoint,
-    // Folder yang disarankan untuk upload user ini. Catatan: ImageKit tidak
-    // memaksa folder lewat token, jadi ini konvensi, bukan batasan keamanan.
-    folder: `${rootFolder}/users/${user.id}`,
+    folders,
+    folder: folders.user, // dipertahankan untuk kompatibilitas
   });
 });
