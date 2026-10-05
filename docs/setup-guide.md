@@ -337,31 +337,80 @@ Setelah login, panggil `supabase.rpc('my_role')`. Kalau hasilnya `customer`, lan
 | Koreksi RAB | `update` kolom `adjustment`, `adjustment_note`, `notes` di `rabs`, atau insert/update/delete `rab_line_items`. Total dihitung otomatis oleh database |
 | Ubah role user | `supabase.rpc('set_user_role', { p_user_id, p_role })` (khusus super admin) |
 | Notifikasi & chat realtime | `supabase.channel(...).on('postgres_changes', { table: 'notifications' \| 'messages' })` |
-| Upload gambar | `supabase.functions.invoke('imagekit-auth')` untuk mendapatkan `token`, `expire`, `signature`, `publicKey`, `folder`, lalu upload ke ImageKit dan simpan `file_id` + URL ke tabel |
+| Upload gambar | `supabase.functions.invoke('imagekit-auth')` untuk mendapatkan `token`, `expire`, `signature`, `publicKey`, `folders`, lalu upload ke ImageKit dan simpan `file_id` + URL ke tabel |
 | Laporan PDF | Route Handler membaca `rab_snapshots.data`, membuat PDF, upload ke ImageKit, lalu upsert `reports` (`on conflict snapshot_id`), dan terakhir `change_project_status(..., 'report_generated')` |
 
-Contoh upload gambar dari web:
+Contoh helper upload. Simpan misalnya di `src/lib/imagekit.ts`, lalu pakai di semua halaman yang ada upload-nya:
 
 ```ts
-const { data: auth, error } = await supabase.functions.invoke('imagekit-auth')
-if (error) throw error
+import type { SupabaseClient } from '@supabase/supabase-js'
 
-const form = new FormData()
-form.append('file', file)
-form.append('fileName', file.name)
-form.append('publicKey', auth.publicKey)
-form.append('signature', auth.signature)
-form.append('expire', String(auth.expire))
-form.append('token', auth.token)
-form.append('folder', `${auth.folder}/catalog`)
+type UploadKind = 'catalog' | 'reports'
 
-const res = await fetch('https://upload.imagekit.io/api/v1/files/upload', { method: 'POST', body: form })
-const uploaded = await res.json()   // simpan uploaded.fileId & uploaded.url ke tabel
+const RULES: Record<UploadKind, { types: string[]; maxMb: number }> = {
+  catalog: { types: ['image/jpeg', 'image/png', 'image/webp'], maxMb: 5 },
+  reports: { types: ['application/pdf'], maxMb: 10 },
+}
+
+export async function uploadToImageKit(
+  supabase: SupabaseClient,
+  file: File | Blob,
+  fileName: string,
+  kind: UploadKind,
+): Promise<{ fileId: string; url: string }> {
+  // 1. Validasi sebelum upload, supaya user dapat pesan yang jelas
+  const rule = RULES[kind]
+  if (!rule.types.includes(file.type)) {
+    throw new Error(`Tipe file tidak didukung (${file.type || 'tidak diketahui'})`)
+  }
+  if (file.size > rule.maxMb * 1024 * 1024) {
+    throw new Error(`Ukuran file maksimal ${rule.maxMb} MB`)
+  }
+
+  // 2. Minta izin upload sekali pakai (wajib login)
+  const { data: auth, error } = await supabase.functions.invoke('imagekit-auth')
+  if (error) throw new Error('Gagal meminta izin upload. Coba login ulang.')
+
+  // 3. Kirim file ke ImageKit
+  const form = new FormData()
+  form.append('file', file)
+  form.append('fileName', fileName)
+  form.append('publicKey', auth.publicKey)
+  form.append('signature', auth.signature)
+  form.append('expire', String(auth.expire))
+  form.append('token', auth.token)
+  form.append('folder', auth.folders[kind])
+
+  const res = await fetch('https://upload.imagekit.io/api/v1/files/upload', { method: 'POST', body: form })
+  const uploaded = await res.json()
+
+  // 4. Jangan lanjut menyimpan ke database kalau upload gagal
+  if (!res.ok || !uploaded.fileId) {
+    throw new Error(uploaded.message ?? 'Upload ke ImageKit gagal')
+  }
+
+  return { fileId: uploaded.fileId, url: uploaded.url }
+}
 ```
 
-- Satu token hanya berlaku untuk **satu upload** dan kedaluwarsa dalam 30 menit. Panggil `imagekit-auth` lagi untuk setiap file.
+Contoh pemakaian di form produk:
+
+```ts
+const { fileId, url } = await uploadToImageKit(supabase, file, file.name, 'catalog')
+await supabase.from('products').update({ image_file_id: fileId, image_url: url }).eq('id', productId)
+```
+
+Folder yang dikembalikan `imagekit-auth` (`auth.folders`):
+
+| Key | Folder (dev) | Untuk |
+|---|---|---|
+| `catalog` | `/renovin/dev/catalog` | Gambar & aset PNG produk |
+| `reports` | `/renovin/dev/reports` | PDF laporan final |
+| `user` | `/renovin/dev/users/<id-user>` | File milik user, misalnya foto ruangan dari Android |
+
+- Satu token hanya berlaku untuk **satu upload** dan kedaluwarsa dalam 30 menit. Helper di atas meminta token baru setiap kali dipanggil.
 - Simpan `fileId` (ke kolom `*_file_id`) dan `url` (ke kolom `*_url`). `fileId` diperlukan untuk menghapus atau mengganti file nanti.
-- Kalau ImageKit menolak signature, kabari backend.
+- **Tes pertama:** kalau muncul *CORS error* di console browser, catat nama header yang ditolak dan kabari backend, supaya header itu ditambahkan ke daftar yang diizinkan. Kalau ImageKit menolak signature, kabari backend juga.
 
 Error dari RPC berupa pesan bahasa Indonesia (misalnya "RAB belum dihitung atau masih kosong"), jadi bisa langsung ditampilkan di toast.
 
