@@ -1,0 +1,16 @@
+# Dependency folder (ukuran sangat besar, tidak perlu dimasukkan ke Git)
+node_modules/
+
+# Environment Variables (SANGAT PENTING: Jangan sampai ke-push ke GitHub!)
+.env
+.env.local
+.env.*.local
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# System Files
+.DS_Store
+Thumbs.db
