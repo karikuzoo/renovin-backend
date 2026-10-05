@@ -4,6 +4,7 @@ Konfigurasi Supabase untuk Renovin: migration database, RLS, seed, dan edge func
 
 File (foto, aset katalog, PDF) disimpan di **ImageKit**, dengan token upload dari edge function `imagekit-auth`.
 
+- Panduan setup proyek (backend + web, pembagian kerja, alur fitur): [docs/setup-guide.md](docs/setup-guide.md)
 - Struktur tabel & hak akses: [docs/erd.md](docs/erd.md)
 - Asumsi yang masih menunggu konfirmasi client: [docs/decisions.md](docs/decisions.md)
 
