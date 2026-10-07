@@ -478,29 +478,24 @@ Issue fitur ──► Backend: migration → PR → review → merge → db push
 
 ## 10. CI/CD (GitHub Actions)
 
-Belum dipasang. Rekomendasi saat tim siap:
+### Backend: sudah terpasang
 
-**Backend: tes migration di setiap PR.** Runner GitHub sudah punya Docker, jadi tes dari nol tetap bisa walaupun laptop tidak memakai Docker. Simpan sebagai `.github/workflows/ci.yml`:
+File: [`.github/workflows/ci.yml`](../.github/workflows/ci.yml). Workflow ini berjalan di setiap PR ke `development`/`main`, setiap push ke `development`, dan bisa dijalankan manual dari tab **Actions**.
 
-```yaml
-name: CI
-on:
-  pull_request:
-    branches: [development, main]
-jobs:
-  migrations:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: supabase/setup-cli@v1
-      - run: supabase start
-      - run: supabase db reset
-      - run: supabase db lint --fail-on error
-```
+| Job | Yang dicek |
+|---|---|
+| **Migration & seed** | Supabase lokal dinyalakan di runner GitHub (yang punya Docker), lalu **semua migration + `seed.sql` dijalankan dari nol** dan database di-lint (`supabase db lint`, gagal kalau ada error). |
+| **Edge functions type-check** | `deno check` untuk semua `supabase/functions/*/index.ts` |
 
-Ini menutup kelemahan alur tanpa Docker, jadi sangat disarankan.
+- Workflow ini **tidak menyentuh** `renovin-dev`/`renovin-prod` dan tidak memakai secret.
+- Ini menutup kelemahan alur tanpa Docker: SQL yang error ketahuan di PR, **sebelum** `db push` ke dev.
+- Kalau job merah, buka tab **Actions** → run yang gagal → step yang merah untuk melihat pesan error-nya.
 
-**Web: lint, cek tipe, dan build di setiap PR**:
+**Jadikan wajib lolos** (dilakukan pemilik repo, setelah workflow pernah jalan minimal sekali): Settings → Branches → rule `development` (dan `main`) → ✅ *Require status checks to pass before merging* → tambahkan **Migration & seed** dan **Edge functions type-check**.
+
+### Web: rekomendasi untuk `renovin-web`
+
+Lint, cek tipe, dan build di setiap PR:
 
 ```yaml
 name: CI
@@ -556,7 +551,8 @@ Deploy ke prod tetap **manual**, mengikuti urutan rilis di dokumen Stack: backen
 - [x] Migration + seed di `renovin-dev`
 - [x] Tipe database ter-generate
 - [x] `imagekit-auth` di-deploy + secret diset
-- [ ] CI migration di GitHub Actions
+- [x] CI migration di GitHub Actions
+- [ ] CI dijadikan *required status check* di branch protection
 - [ ] Signed URL foto private
 
 **Web**

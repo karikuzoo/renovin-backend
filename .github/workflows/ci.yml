@@ -1,0 +1,75 @@
+# Cek otomatis setiap PR ke development/main:
+#   1. migrations     — semua migration + seed dijalankan dari nol di Supabase
+#                       lokal (Docker di runner GitHub), lalu di-lint.
+#   2. edge-functions — type-check kode edge function dengan Deno.
+#
+# Workflow ini TIDAK menyentuh renovin-dev / renovin-prod dan tidak butuh secret.
+
+name: CI
+
+on:
+  pull_request:
+    branches: [development, main]
+  push:
+    branches: [development]
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  migrations:
+    name: Migration & seed
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      # Supabase CLI versi yang sama dengan package-lock.json
+      - run: npm ci
+
+      # Menjalankan Postgres + Auth saja, lalu menerapkan semua migration
+      # dan seed.sql dari nol. Gagal kalau ada SQL yang error.
+      - name: Start Supabase (migrations + seed)
+        run: >-
+          npx supabase start
+          -x realtime,storage-api,imgproxy,kong,mailpit,postgrest,postgres-meta,studio,edge-runtime,logflare,vector,supavisor
+
+      - name: Lint database
+        run: npx supabase db lint --local --schema public,private --level warning --fail-on error
+
+      - name: Ringkasan data seed
+        if: always()
+        run: |
+          docker exec supabase_db_renovin-backend psql -U postgres -d postgres -c "
+            select 'profiles' as tabel, count(*) from public.profiles
+            union all select 'products', count(*) from public.products
+            union all select 'projects', count(*) from public.projects
+            union all select 'rab_line_items', count(*) from public.rab_line_items;" || true
+
+      - name: Stop Supabase
+        if: always()
+        run: npx supabase stop --no-backup
+
+  edge-functions:
+    name: Edge functions type-check
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+
+      # --node-modules-dir=none: abaikan package.json di root (itu untuk Supabase CLI)
+      - run: deno check --node-modules-dir=none --no-lock supabase/functions/*/index.ts
