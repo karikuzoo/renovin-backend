@@ -73,4 +73,9 @@ jobs:
           deno-version: v2.x
 
       # --node-modules-dir=none: abaikan package.json di root (itu untuk Supabase CLI)
-      - run: deno check --node-modules-dir=none --no-lock supabase/functions/*/index.ts
+      # Lolos tanpa error kalau belum ada edge function sama sekali.
+      - run: |
+          shopt -s nullglob
+          files=(supabase/functions/*/index.ts)
+          if [ ${#files[@]} -eq 0 ]; then echo "Belum ada edge function, lewati."; exit 0; fi
+          deno check --node-modules-dir=none --no-lock "${files[@]}"

@@ -22,9 +22,7 @@ supabase/
 │   ├── ..._audit_logs.sql            audit trail
 │   ├── ..._chat.sql                  chat customer ↔ admin
 │   └── ..._storage.sql               bucket penyimpanan file + aturan akses
-├── seed.sql                akun uji & data contoh (HANYA lokal/dev)
-└── functions/
-    └── imagekit-auth/      (usang) token upload ImageKit, dihapus setelah web pindah ke Storage
+└── seed.sql                akun uji & data contoh (HANYA lokal/dev)
 docs/
 types/database.types.ts     hasil `npm run types`
 ```
@@ -49,16 +47,6 @@ npm run push:dev:seed
 ```
 
 Cek dulu dengan `--dry-run`. **`--include-seed` hanya untuk dev**: seed membuat akun dengan password yang diketahui semua orang.
-
-### Edge function ImageKit (usang)
-
-Tidak dipakai lagi setelah pindah ke Supabase Storage. Dipertahankan sementara sampai `renovin-web` selesai pindah, lalu dihapus.
-
-```bash
-cp supabase/functions/.env.example supabase/functions/.env   # isi key ImageKit
-npm run secrets:set
-npm run functions:deploy
-```
 
 ## Akun uji (seed)
 
@@ -102,7 +90,5 @@ Aturan:
 | `SUPABASE_ACCESS_TOKEN` | `.env`, secret CI | Dari dashboard → Account → Access Tokens |
 | `SUPABASE_DB_PASSWORD` | `.env`, secret CI | Password database project |
 | `SUPABASE_DEV_PROJECT_REF` / `SUPABASE_PROD_PROJECT_REF` | `.env`, secret CI | ID project |
-| `IMAGEKIT_PUBLIC_KEY`, `IMAGEKIT_PRIVATE_KEY`, `IMAGEKIT_URL_ENDPOINT` | `supabase/functions/.env`, `supabase secrets` | Dari dashboard ImageKit |
-| `ALLOWED_ORIGINS` | `supabase/functions/.env`, `supabase secrets` | Origin web admin, dipisah koma |
 
 Secret key / `service_role` **tidak pernah** dipakai di `renovin-web` atau `renovin-android`.
