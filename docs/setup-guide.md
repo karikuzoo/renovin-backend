@@ -58,6 +58,7 @@ renovin-android ───────┘   (Singapore)        ├─► Realtime
 | Server Express lama dihapus | ✅ |
 | Supabase Storage: bucket `catalog`, `room-photos`, `reports` + aturan akses | ✅ Live di `renovin-dev` (10 Okt 2026). Domain storage dites bisa diakses di by.U |
 | Foto customer & PDF privat (signed URL) | ✅ Tercakup oleh bucket privat + RLS |
+| Lupa password admin: edge function + template email | ⏳ Kode siap; perlu setup Gmail SMTP + deploy ([lupa-password.md](lupa-password.md)) |
 | Notifikasi WhatsApp | ⏳ Menunggu pilihan provider |
 | Konfirmasi asumsi ke client ([decisions.md](decisions.md)) | ⏳ |
 | Supabase `renovin-prod` | ⏳ Dibuat menjelang rilis |
@@ -311,6 +312,7 @@ Setelah login, panggil `supabase.rpc('my_role')`. Kalau hasilnya `customer`, lan
 | Hitung RAB | `supabase.rpc('calculate_rab', { p_project_id })`. Baris manual admin tidak hilang |
 | Koreksi RAB | `update` kolom `adjustment`, `adjustment_note`, `notes` di `rabs`, atau insert/update/delete `rab_line_items`. Total dihitung otomatis oleh database |
 | Ubah role user | `supabase.rpc('set_user_role', { p_user_id, p_role })` (khusus super admin) |
+| Lupa password admin | `supabase.functions.invoke('request-password-reset', { body: { email } })` + halaman `/auth/confirm` dan `/reset-password`. Kontrak & contoh kode: [lupa-password.md](lupa-password.md) |
 | Notifikasi & chat realtime | `supabase.channel(...).on('postgres_changes', { table: 'notifications' \| 'messages' })` |
 | Upload file | `uploadFile(file, bucket, folder)` di `lib/storage.ts` → simpan `path` ke kolom `*_file_id` dan `url` ke kolom `*_url` |
 | Tampilkan file privat | `getFileUrl(bucket, path)` → signed URL yang kedaluwarsa (default 1 jam) |
