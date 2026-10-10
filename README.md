@@ -2,7 +2,7 @@
 
 Konfigurasi Supabase untuk Renovin: migration database, RLS, seed, dan edge functions. Repo ini **tidak berisi server**. Web admin (`renovin-web`) dan aplikasi Android (`renovin-android`) mengakses Supabase langsung, dan RLS di database yang menentukan siapa boleh mengakses data apa.
 
-File (foto, aset katalog, PDF) disimpan di **ImageKit**, dengan token upload dari edge function `imagekit-auth`.
+File (foto, aset katalog, PDF) disimpan di **Supabase Storage** (bucket `catalog`, `room-photos`, `reports`), dengan aturan akses yang sama seperti data (RLS). ImageKit tidak dipakai lagi karena domainnya diblokir di jaringan Telkom Group; lihat [docs/decisions.md](docs/decisions.md) A2.
 
 - Panduan setup proyek (backend + web, pembagian kerja, alur fitur): [docs/setup-guide.md](docs/setup-guide.md)
 - Struktur tabel & hak akses: [docs/erd.md](docs/erd.md)
@@ -20,10 +20,11 @@ supabase/
 │   ├── ..._rab.sql                   RAB, perhitungan, snapshot final, laporan
 │   ├── ..._project_workflow.sql      aturan status, approval, notifikasi
 │   ├── ..._audit_logs.sql            audit trail
-│   └── ..._chat.sql                  chat customer ↔ admin
+│   ├── ..._chat.sql                  chat customer ↔ admin
+│   └── ..._storage.sql               bucket penyimpanan file + aturan akses
 ├── seed.sql                akun uji & data contoh (HANYA lokal/dev)
 └── functions/
-    └── imagekit-auth/      token upload ImageKit untuk user yang login
+    └── imagekit-auth/      (usang) token upload ImageKit, dihapus setelah web pindah ke Storage
 docs/
 types/database.types.ts     hasil `npm run types`
 ```
@@ -49,7 +50,9 @@ npm run push:dev:seed
 
 Cek dulu dengan `--dry-run`. **`--include-seed` hanya untuk dev**: seed membuat akun dengan password yang diketahui semua orang.
 
-### Edge function ImageKit
+### Edge function ImageKit (usang)
+
+Tidak dipakai lagi setelah pindah ke Supabase Storage. Dipertahankan sementara sampai `renovin-web` selesai pindah, lalu dihapus.
 
 ```bash
 cp supabase/functions/.env.example supabase/functions/.env   # isi key ImageKit

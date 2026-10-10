@@ -9,8 +9,8 @@ Status: ⏳ = menunggu konfirmasi client, ✅ = sudah disepakati.
 | # | Keputusan | Status |
 |---|---|---|
 | A1 | Backend = Supabase saja (migration, RLS, seed, edge functions). Server Express dihapus. | ✅ |
-| A2 | File (foto, aset katalog, PDF) disimpan di **ImageKit**. Database hanya menyimpan `file_id` dan URL. | ✅ |
-| A3 | Token upload ImageKit diberikan oleh edge function `imagekit-auth`, hanya untuk user yang login. | ✅ |
+| A2 | File (foto, aset katalog, PDF) disimpan di **Supabase Storage** (bucket `catalog`, `room-photos`, `reports`). Database hanya menyimpan path dan URL. *Diubah 10 Okt 2026: sebelumnya ImageKit, tapi domain `ik.imagekit.io` diblokir "Internet Baik" di jaringan Telkom Group (Telkomsel, by.U, IndiHome), sehingga gambar tidak tampil untuk sebagian besar pengguna di Indonesia.* | ✅ |
+| A3 | ~~Token upload ImageKit dari edge function `imagekit-auth`.~~ Digantikan aturan akses (RLS) Supabase Storage. Edge function `imagekit-auth` dihapus setelah `renovin-web` pindah ke Supabase Storage. | ⏳ |
 
 ## Asumsi yang menunggu konfirmasi
 
@@ -35,5 +35,6 @@ Status: ⏳ = menunggu konfirmasi client, ✅ = sudah disepakati.
 - **RAB dan snapshot hanya bisa dibaca staff**, karena berisi harga internal. Customer menerima hasil akhir lewat PDF (`reports`).
 - **Status project tidak bisa diubah langsung.** Kolom `status` tidak di-grant ke client, jadi semua perubahan lewat `change_project_status()`, yang mengecek role, transisi, dan data minimum, lalu mencatat riwayat.
 - **Role user tidak bisa diubah sendiri.** Perubahan role lewat `set_user_role()` (khusus super admin).
-- **Foto di ImageKit belum mengikuti RLS.** Saat ini URL ImageKit bersifat publik bagi siapa pun yang tahu URL-nya. PRD meminta URL aset mengikuti kontrol akses, jadi **TODO**: upload foto customer sebagai *private file* dan buat edge function `imagekit-signed-url` yang mengecek `can_read_project()` sebelum memberi signed URL.
-- **Token upload ImageKit tidak membatasi folder.** Field `folder` dari `imagekit-auth` hanya konvensi.
+- **Foto customer dan PDF laporan bersifat privat.** Bucket `room-photos` dan `reports` hanya bisa dibaca pemilik project dan staff (RLS, sama dengan data project). File ditampilkan lewat *signed URL* yang kedaluwarsa. Bucket `catalog` publik, karena gambar produk memang untuk semua orang.
+- **Path objek wajib diawali `project_id`** di `room-photos` dan `reports` (contoh: `<project_id>/foto.jpg`). Path lain otomatis ditolak.
+- **Kuota Supabase Free 1 GB storage.** Foto wajib dikompres di aplikasi sebelum upload (disarankan ≤ 1600 px sisi terpanjang, JPEG/WebP). Batas per file: 5 MB (`catalog`), 10 MB (`room-photos`, `reports`).

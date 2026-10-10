@@ -7,7 +7,8 @@
 --   customer1@renovin.test    customer  (punya project P1, P2, P3)
 --   customer2@renovin.test    customer  (punya project P4, P5)
 --
--- Foto memakai placeholder (placehold.co), bukan file ImageKit sungguhan.
+-- Foto memakai placeholder PNG dari placehold.co (bukan file di Supabase Storage).
+-- Format PNG wajib: next/image di renovin-web menolak SVG.
 -- =============================================================================
 
 -- -----------------------------------------------------------------------------
@@ -63,26 +64,26 @@ insert into public.products (
   -- Cat (harga per m2)
   ('20000000-0000-4000-a000-000000000001', '10000000-0000-4000-a000-000000000001', 'paint', 'CAT-001',
    'Cat Interior Putih Gading', 'm2', 35000, 'Putih Gading', '#F3EBDD', null, null, null,
-   'https://placehold.co/400x400/F3EBDD/333?text=Putih+Gading', null, true, '00000000-0000-4000-a000-000000000002'),
+   'https://placehold.co/400x400/F3EBDD/333/png?text=Putih+Gading', null, true, '00000000-0000-4000-a000-000000000002'),
   ('20000000-0000-4000-a000-000000000002', '10000000-0000-4000-a000-000000000001', 'paint', 'CAT-002',
    'Cat Interior Sage Green', 'm2', 38000, 'Sage Green', '#A3B18A', null, null, null,
-   'https://placehold.co/400x400/A3B18A/fff?text=Sage+Green', null, true, '00000000-0000-4000-a000-000000000002'),
+   'https://placehold.co/400x400/A3B18A/fff/png?text=Sage+Green', null, true, '00000000-0000-4000-a000-000000000002'),
   ('20000000-0000-4000-a000-000000000003', '10000000-0000-4000-a000-000000000001', 'paint', 'CAT-003',
    'Cat Interior Abu Hangat', 'm2', 36000, 'Abu Hangat', '#B8B0A6', null, null, null,
-   'https://placehold.co/400x400/B8B0A6/fff?text=Abu+Hangat', null, true, '00000000-0000-4000-a000-000000000002'),
+   'https://placehold.co/400x400/B8B0A6/fff/png?text=Abu+Hangat', null, true, '00000000-0000-4000-a000-000000000002'),
   ('20000000-0000-4000-a000-000000000004', '10000000-0000-4000-a000-000000000001', 'paint', 'CAT-004',
    'Cat Interior Terracotta (nonaktif)', 'm2', 40000, 'Terracotta', '#C2703D', null, null, null,
-   'https://placehold.co/400x400/C2703D/fff?text=Terracotta', null, false, '00000000-0000-4000-a000-000000000002'),
+   'https://placehold.co/400x400/C2703D/fff/png?text=Terracotta', null, false, '00000000-0000-4000-a000-000000000002'),
   -- Furnitur (harga per unit)
   ('20000000-0000-4000-a000-000000000011', '10000000-0000-4000-a000-000000000002', 'furniture', 'SOFA-001',
    'Sofa 3 Dudukan Linen Abu', 'pcs', 4500000, null, null, 200, 85, 80,
-   'https://placehold.co/400x300?text=Sofa+3+Dudukan', 'https://placehold.co/800x400/png?text=Sofa+Asset', true, '00000000-0000-4000-a000-000000000002'),
+   'https://placehold.co/400x300/png?text=Sofa+3+Dudukan', 'https://placehold.co/800x400/png?text=Sofa+Asset', true, '00000000-0000-4000-a000-000000000002'),
   ('20000000-0000-4000-a000-000000000012', '10000000-0000-4000-a000-000000000003', 'furniture', 'MEJA-001',
    'Meja Kopi Kayu Jati', 'pcs', 1750000, null, null, 100, 55, 45,
-   'https://placehold.co/400x300?text=Meja+Kopi', 'https://placehold.co/800x400/png?text=Meja+Asset', true, '00000000-0000-4000-a000-000000000002'),
+   'https://placehold.co/400x300/png?text=Meja+Kopi', 'https://placehold.co/800x400/png?text=Meja+Asset', true, '00000000-0000-4000-a000-000000000002'),
   ('20000000-0000-4000-a000-000000000013', '10000000-0000-4000-a000-000000000004', 'furniture', 'RAK-001',
    'Rak Buku Minimalis 5 Susun', 'pcs', 1250000, null, null, 80, 30, 180,
-   'https://placehold.co/400x300?text=Rak+Buku', 'https://placehold.co/800x400/png?text=Rak+Asset', true, '00000000-0000-4000-a000-000000000002');
+   'https://placehold.co/400x300/png?text=Rak+Buku', 'https://placehold.co/800x400/png?text=Rak+Asset', true, '00000000-0000-4000-a000-000000000002');
 
 insert into public.product_internal_prices (product_id, price_internal, updated_by) values
   ('20000000-0000-4000-a000-000000000001',   22000, '00000000-0000-4000-a000-000000000002'),
@@ -123,13 +124,13 @@ select setval('public.project_code_seq', 100);
 -- Foto (P2–P5)
 insert into public.room_photos (id, project_id, original_url, processed_url, width, height) values
   ('40000000-0000-4000-a000-000000000002', '30000000-0000-4000-a000-000000000002',
-   'https://placehold.co/1200x800?text=Ruang+Tamu+-+Asli', 'https://placehold.co/1200x800/F3EBDD/333?text=Ruang+Tamu+-+Desain', 1200, 800),
+   'https://placehold.co/1200x800/png?text=Ruang+Tamu+-+Asli', 'https://placehold.co/1200x800/F3EBDD/333/png?text=Ruang+Tamu+-+Desain', 1200, 800),
   ('40000000-0000-4000-a000-000000000003', '30000000-0000-4000-a000-000000000003',
-   'https://placehold.co/1200x800?text=Ruang+Keluarga+-+Asli', 'https://placehold.co/1200x800/A3B18A/fff?text=Ruang+Keluarga+-+Desain', 1200, 800),
+   'https://placehold.co/1200x800/png?text=Ruang+Keluarga+-+Asli', 'https://placehold.co/1200x800/A3B18A/fff/png?text=Ruang+Keluarga+-+Desain', 1200, 800),
   ('40000000-0000-4000-a000-000000000004', '30000000-0000-4000-a000-000000000004',
-   'https://placehold.co/1200x800?text=Kamar+Anak+-+Asli', 'https://placehold.co/1200x800/B8B0A6/fff?text=Kamar+Anak+-+Desain', 1200, 800),
+   'https://placehold.co/1200x800/png?text=Kamar+Anak+-+Asli', 'https://placehold.co/1200x800/B8B0A6/fff/png?text=Kamar+Anak+-+Desain', 1200, 800),
   ('40000000-0000-4000-a000-000000000005', '30000000-0000-4000-a000-000000000005',
-   'https://placehold.co/1200x800?text=Ruang+Kerja+-+Asli', 'https://placehold.co/1200x800/A3B18A/fff?text=Ruang+Kerja+-+Desain', 1200, 800);
+   'https://placehold.co/1200x800/png?text=Ruang+Kerja+-+Asli', 'https://placehold.co/1200x800/A3B18A/fff/png?text=Ruang+Kerja+-+Desain', 1200, 800);
 
 -- Wall paint
 insert into public.wall_paints (id, project_id, photo_id, label, product_id, color_name, color_hex) values
