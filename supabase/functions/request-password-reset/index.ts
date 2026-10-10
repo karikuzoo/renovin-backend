@@ -20,7 +20,7 @@ import { createClient } from 'npm:@supabase/supabase-js@2';
 
 const STAFF_ROLES = ['admin', 'super_admin'];
 const GENERIC_MESSAGE =
-  'Jika email terdaftar sebagai admin, link untuk mengatur ulang kata sandi akan dikirim ke email tersebut.';
+  'Link untuk mengatur ulang kata sandi sudah dikirim ke email tersebut.';
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 // Semua jawaban ditahan minimal selama ini, supaya lama proses tidak membocorkan
 // apakah email tersebut akun admin (jalur admin lebih lama karena mengirim email).
