@@ -7,6 +7,7 @@ File (foto, aset katalog, PDF) disimpan di **Supabase Storage** (bucket `catalog
 - Panduan setup proyek (backend + web, pembagian kerja, alur fitur): [docs/setup-guide.md](docs/setup-guide.md)
 - Struktur tabel & hak akses: [docs/erd.md](docs/erd.md)
 - Asumsi yang masih menunggu konfirmasi client: [docs/decisions.md](docs/decisions.md)
+- Lupa password admin (setup Gmail SMTP + kontrak FE): [docs/lupa-password.md](docs/lupa-password.md)
 
 ## Struktur
 
@@ -22,7 +23,11 @@ supabase/
 │   ├── ..._audit_logs.sql            audit trail
 │   ├── ..._chat.sql                  chat customer ↔ admin
 │   └── ..._storage.sql               bucket penyimpanan file + aturan akses
-└── seed.sql                akun uji & data contoh (HANYA lokal/dev)
+├── seed.sql                akun uji & data contoh (HANYA lokal/dev)
+├── templates/
+│   └── recovery.html       email reset password (bahasa Indonesia)
+└── functions/
+    └── request-password-reset/   reset password khusus admin & super admin
 docs/
 types/database.types.ts     hasil `npm run types`
 ```
@@ -90,5 +95,6 @@ Aturan:
 | `SUPABASE_ACCESS_TOKEN` | `.env`, secret CI | Dari dashboard → Account → Access Tokens |
 | `SUPABASE_DB_PASSWORD` | `.env`, secret CI | Password database project |
 | `SUPABASE_DEV_PROJECT_REF` / `SUPABASE_PROD_PROJECT_REF` | `.env`, secret CI | ID project |
+| `ALLOWED_ORIGINS` | `supabase/functions/.env`, `supabase secrets` | Origin web admin yang boleh memanggil edge function, dipisah koma |
 
 Secret key / `service_role` **tidak pernah** dipakai di `renovin-web` atau `renovin-android`.

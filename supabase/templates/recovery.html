@@ -1,0 +1,31 @@
+<!--
+  Template email "Reset Password" Renovin.
+  Lokal: dipakai otomatis lewat supabase/config.toml.
+  Cloud (renovin-dev / renovin-prod): salin isi file ini ke
+  Dashboard -> Authentication -> Emails -> Reset Password.
+
+  Link memakai token_hash (bukan {{ .ConfirmationURL }}) supaya bisa diverifikasi
+  di server oleh renovin-web: GET /auth/confirm?token_hash=...&type=recovery&next=/reset-password
+-->
+<div style="font-family: Arial, Helvetica, sans-serif; max-width: 480px; margin: 0 auto; color: #302F2B;">
+  <h2 style="color: #2C4A3B; margin-bottom: 4px;">Renovin.</h2>
+  <p style="margin-top: 0; font-size: 12px; color: #6B6B6B;">Portal administrator</p>
+
+  <p>Halo,</p>
+  <p>
+    Kami menerima permintaan untuk mengatur ulang kata sandi akun admin
+    <strong>{{ .Email }}</strong>.
+  </p>
+
+  <p style="margin: 28px 0;">
+    <a
+      href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=recovery&next=/reset-password"
+      style="background: #2C4A3B; color: #FFFFFF; padding: 12px 20px; border-radius: 6px; text-decoration: none; display: inline-block;"
+    >Atur ulang kata sandi</a>
+  </p>
+
+  <p style="font-size: 13px; color: #6B6B6B;">
+    Link ini hanya bisa dipakai sekali dan akan kedaluwarsa. Kalau Anda tidak merasa meminta
+    pengaturan ulang kata sandi, abaikan email ini. Kata sandi Anda tidak akan berubah.
+  </p>
+</div>

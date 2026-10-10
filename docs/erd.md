@@ -83,6 +83,12 @@ Kolom file di tabel:
 
 Path yang folder pertamanya bukan `project_id` yang valid otomatis ditolak di `room-photos` dan `reports` (helper `storage_project_id()`).
 
+## Edge function
+
+| Function | Login? | Kegunaan |
+|---|---|---|
+| `request-password-reset` | Tidak | Kirim email reset password **hanya** untuk admin & super admin. Jawaban selalu sama. Detail: [lupa-password.md](lupa-password.md) |
+
 ## Fungsi yang dipanggil dari web/android (RPC)
 
 | Fungsi | Dipanggil oleh | Kegunaan |
