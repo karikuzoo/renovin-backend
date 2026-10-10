@@ -56,9 +56,8 @@ renovin-android ───────┘   (Singapore)        ├─► Realtime
 | 7 migration + seed diterapkan ke `renovin-dev` | ✅ PR [karikuzoo/renovin-backend#1](https://github.com/karikuzoo/renovin-backend/pull/1) |
 | `types/database.types.ts` ter-generate | ✅ |
 | Server Express lama dihapus | ✅ |
-| Supabase Storage: bucket `catalog`, `room-photos`, `reports` + aturan akses | ⏳ Migration siap, menunggu `db push` ke `renovin-dev` |
+| Supabase Storage: bucket `catalog`, `room-photos`, `reports` + aturan akses | ✅ Live di `renovin-dev` (10 Okt 2026). Domain storage dites bisa diakses di by.U |
 | Foto customer & PDF privat (signed URL) | ✅ Tercakup oleh bucket privat + RLS |
-| Edge function `imagekit-auth` | ⚠️ Usang. Dihapus setelah `renovin-web` pindah ke Storage |
 | Notifikasi WhatsApp | ⏳ Menunggu pilihan provider |
 | Konfirmasi asumsi ke client ([decisions.md](decisions.md)) | ⏳ |
 | Supabase `renovin-prod` | ⏳ Dibuat menjelang rilis |
@@ -393,13 +392,13 @@ Issue fitur ──► Backend: migration → PR → review → merge → db push
 | # | Fitur | Backend | Web | Ref FSD |
 |---|---|---|---|---|
 | 1 | Login & layout | ✅ siap | Login, proxy, layout, tolak customer | §5 |
-| 2 | Katalog | ✅ data · ⏳ upload gambar (bucket `catalog`, setelah `db push`) | CRUD produk, harga internal, aktif/nonaktif | FS-15 |
+| 2 | Katalog | ✅ data + upload gambar (bucket `catalog`) | CRUD produk, harga internal, aktif/nonaktif | FS-15 |
 | 3 | Tarif & pajak | ✅ | Halaman pengaturan | §7 |
 | 4 | Daftar & detail project | ✅ (seed P1–P5) | Daftar per status, before/after, timeline | FS-08 |
 | 5 | Workflow status | ✅ `change_project_status` + notifikasi | Tombol aksi sesuai status & role | §8 |
 | 6 | RAB draft & koreksi | ✅ `calculate_rab` + audit | Halaman RAB, edit baris, adjustment | FS-09, FS-11 |
 | 7 | Approval super admin | ✅ | Antrean + Approve/Correction/Reject (catatan wajib) | FS-10 |
-| 8 | Confirm final & PDF | ✅ snapshot · ⏳ upload PDF (bucket `reports`, setelah `db push`) | Confirm, generate PDF, download | FS-12, FS-13 |
+| 8 | Confirm final & PDF | ✅ snapshot + upload PDF (bucket `reports`) | Confirm, generate PDF, download | FS-12, FS-13 |
 | 9 | Chat | ✅ in-app · ⏳ WhatsApp | Daftar percakapan + pesan realtime | FS-14 |
 
 ---
@@ -477,8 +476,8 @@ Deploy ke prod tetap **manual**, mengikuti urutan rilis di dokumen Stack: backen
 **Backend**
 - [x] Migration + seed di `renovin-dev`
 - [x] Tipe database ter-generate
-- [ ] Migration storage di-push ke `renovin-dev`
-- [ ] Domain Supabase dites di jaringan Telkomsel/by.U
+- [x] Migration storage di-push ke `renovin-dev`
+- [x] Domain Supabase dites di jaringan Telkomsel/by.U
 - [x] CI migration di GitHub Actions
 - [ ] CI dijadikan *required status check* di branch protection
 - [ ] Signed URL foto private

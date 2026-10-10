@@ -10,7 +10,7 @@ Status: ⏳ = menunggu konfirmasi client, ✅ = sudah disepakati.
 |---|---|---|
 | A1 | Backend = Supabase saja (migration, RLS, seed, edge functions). Server Express dihapus. | ✅ |
 | A2 | File (foto, aset katalog, PDF) disimpan di **Supabase Storage** (bucket `catalog`, `room-photos`, `reports`). Database hanya menyimpan path dan URL. *Diubah 10 Okt 2026: sebelumnya ImageKit, tapi domain `ik.imagekit.io` diblokir "Internet Baik" di jaringan Telkom Group (Telkomsel, by.U, IndiHome), sehingga gambar tidak tampil untuk sebagian besar pengguna di Indonesia.* | ✅ |
-| A3 | ~~Token upload ImageKit dari edge function `imagekit-auth`.~~ Digantikan aturan akses (RLS) Supabase Storage. Edge function `imagekit-auth` dihapus setelah `renovin-web` pindah ke Supabase Storage. | ⏳ |
+| A3 | ~~Token upload ImageKit dari edge function `imagekit-auth`.~~ Digantikan aturan akses (RLS) Supabase Storage. Edge function `imagekit-auth` dan secret ImageKit dihapus 11 Okt 2026. | ✅ |
 
 ## Asumsi yang menunggu konfirmasi
 
