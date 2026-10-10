@@ -65,6 +65,24 @@ erDiagram
 | Audit log | ✗ | Baca | Baca |
 | Ubah role user | ✗ | ✗ | ✓ (`set_user_role`) |
 
+## Penyimpanan file (Supabase Storage)
+
+| Bucket | Akses | Path | Isi | Batas |
+|---|---|---|---|---|
+| `catalog` | **Publik** untuk dilihat; upload/ganti/hapus hanya staff | `products/<product_id>/<file>` | Gambar produk, aset PNG furnitur | 5 MB · JPEG/PNG/WebP |
+| `room-photos` | **Privat**: pemilik project + staff. Customer menulis selama `draft`/`ready_to_submit`, staff selama diproses | `<project_id>/<file>` | Foto ruangan asli, hasil desain | 10 MB · JPEG/PNG/WebP |
+| `reports` | **Privat**: pemilik project + staff. Upload/ganti hanya staff, tidak bisa dihapus | `<project_id>/<file>` | PDF laporan final | 10 MB · PDF |
+
+Kolom file di tabel:
+
+| Kolom | Isi |
+|---|---|
+| `*_file_id` (`image_file_id`, `original_file_id`, `pdf_file_id`, …) | Path objek di bucket |
+| `*_url` untuk bucket `catalog` | URL publik (`storage.from('catalog').getPublicUrl(path)`) |
+| `*_url` untuk bucket privat | Path objek. Tampilkan dengan `storage.from(bucket).createSignedUrl(path, detik)` |
+
+Path yang folder pertamanya bukan `project_id` yang valid otomatis ditolak di `room-photos` dan `reports` (helper `storage_project_id()`).
+
 ## Fungsi yang dipanggil dari web/android (RPC)
 
 | Fungsi | Dipanggil oleh | Kegunaan |

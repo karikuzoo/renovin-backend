@@ -37,12 +37,12 @@ jobs:
       # Supabase CLI versi yang sama dengan package-lock.json
       - run: npm ci
 
-      # Menjalankan Postgres + Auth saja, lalu menerapkan semua migration
+      # Menjalankan Postgres + Auth + Storage, lalu menerapkan semua migration
       # dan seed.sql dari nol. Gagal kalau ada SQL yang error.
       - name: Start Supabase (migrations + seed)
         run: >-
           npx supabase start
-          -x realtime,storage-api,imgproxy,kong,mailpit,postgrest,postgres-meta,studio,edge-runtime,logflare,vector,supavisor
+          -x realtime,imgproxy,kong,mailpit,postgrest,postgres-meta,studio,edge-runtime,logflare,vector,supavisor
 
       - name: Lint database
         run: npx supabase db lint --local --schema public,private --level warning --fail-on error
@@ -54,7 +54,8 @@ jobs:
             select 'profiles' as tabel, count(*) from public.profiles
             union all select 'products', count(*) from public.products
             union all select 'projects', count(*) from public.projects
-            union all select 'rab_line_items', count(*) from public.rab_line_items;" || true
+            union all select 'rab_line_items', count(*) from public.rab_line_items
+            union all select 'storage buckets', count(*) from storage.buckets;" || true
 
       - name: Stop Supabase
         if: always()

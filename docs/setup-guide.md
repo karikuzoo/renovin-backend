@@ -32,12 +32,11 @@ Dokumen terkait di repo ini:
 renovin-web (Next.js) ─┐                      ┌─► Postgres + RLS (22 tabel)
                        ├─► Supabase renovin-dev├─► Auth
 renovin-android ───────┘   (Singapore)        ├─► Realtime (notifikasi, chat)
-        │                                     └─► Edge function imagekit-auth
-        └──────────── upload file ──────────────► ImageKit (foto, aset, PDF)
+                                              └─► Storage (foto, aset, PDF)
 ```
 
 - **Tidak ada server sendiri.** Web dan Android mengakses Supabase langsung. Hak akses dijaga **RLS** di database.
-- **File disimpan di ImageKit.** Database hanya menyimpan `file_id` dan URL.
+- **File disimpan di Supabase Storage** dengan aturan akses (RLS) yang sama seperti data. Database menyimpan path dan URL-nya. ImageKit tidak dipakai lagi karena domain `ik.imagekit.io` diblokir di jaringan Telkom Group ([decisions.md](decisions.md) A2).
 
 | Repo | Penanggung jawab | Isi |
 |---|---|---|
@@ -57,8 +56,9 @@ renovin-android ───────┘   (Singapore)        ├─► Realtime
 | 7 migration + seed diterapkan ke `renovin-dev` | ✅ PR [karikuzoo/renovin-backend#1](https://github.com/karikuzoo/renovin-backend/pull/1) |
 | `types/database.types.ts` ter-generate | ✅ |
 | Server Express lama dihapus | ✅ |
-| Edge function `imagekit-auth` di-deploy + secret ImageKit | ✅ Live di `renovin-dev` (5 Okt 2026). Penolakan tanpa login dan CORS sudah dites; upload sukses belum dites dari web |
-| Signed URL untuk foto private (ImageKit) | ⏳ Belum dibuat |
+| Supabase Storage: bucket `catalog`, `room-photos`, `reports` + aturan akses | ⏳ Migration siap, menunggu `db push` ke `renovin-dev` |
+| Foto customer & PDF privat (signed URL) | ✅ Tercakup oleh bucket privat + RLS |
+| Edge function `imagekit-auth` | ⚠️ Usang. Dihapus setelah `renovin-web` pindah ke Storage |
 | Notifikasi WhatsApp | ⏳ Menunggu pilihan provider |
 | Konfirmasi asumsi ke client ([decisions.md](decisions.md)) | ⏳ |
 | Supabase `renovin-prod` | ⏳ Dibuat menjelang rilis |
@@ -97,7 +97,7 @@ git config --global core.autocrlf true
 |---|---|---|
 | **GitHub** | `karikuzoo` (repo backend, web, android) | Ihsan, Rivaldy |
 | **Supabase** | Org *Swandaa Org* (Free) → project `renovin-dev` | Ihsan (owner). Rivaldy opsional, role *Read-only* / *Developer* |
-| **ImageKit** | ID `msyhbdl24`, endpoint `https://ik.imagekit.io/msyhbdl24`. Key: `supabase-renovin-dev` | Ihsan (pemegang private key) |
+| **ImageKit** | Tidak dipakai lagi (diblokir di jaringan Telkom Group). Akun ID `msyhbdl24` bisa ditutup setelah migrasi selesai | Ihsan |
 | **Hosting web** | Vercel / Netlify / Cloudflare (belum dipilih) | Rivaldy |
 
 ### Apa yang dibagikan ke siapa
@@ -109,7 +109,6 @@ git config --global core.autocrlf true
 | Password database | ✅ | ❌ | Password manager |
 | Secret key / `service_role` | ✅ (edge function, CI) | ❌ **jangan pernah** | Supabase secrets, GitHub secrets |
 | Supabase access token | ✅ (pribadi) | ❌ | Laptop masing-masing (`supabase login`) |
-| ImageKit private key | ✅ | ❌ | `supabase secrets` |
 
 Password dan key **tidak dikirim lewat chat atau WhatsApp**. Pakai password manager tim.
 
@@ -209,41 +208,18 @@ Aturan migration:
 3. Perubahan harus **backward compatible**. Tambah kolom boleh, hapus atau ganti nama kolom menunggu Android versi lama tidak dipakai.
 4. **RLS aktif** di setiap tabel baru, dengan policy select/insert/update/delete sesuai role.
 
-### Edge function ImageKit
+### Penyimpanan file (Supabase Storage)
 
-Sudah di-deploy ke `renovin-dev`. Hasil tes:
+Dibuat oleh migration `..._storage.sql`. Detail bucket, path, dan hak akses ada di [erd.md](erd.md#penyimpanan-file-supabase-storage).
 
-| Tes | Hasil |
-|---|---|
-| Tanpa header `Authorization` | `401` |
-| Token palsu | `401 Invalid JWT` (ditolak gateway Supabase) |
-| Preflight CORS dari `http://localhost:3000` | `Access-Control-Allow-Origin: http://localhost:3000` |
-| Preflight CORS dari origin lain | Tanpa header `Allow-Origin`, jadi diblokir browser |
+| Bucket | Akses | Path |
+|---|---|---|
+| `catalog` | Publik untuk dilihat, tulis hanya staff | `products/<product_id>/<file>` |
+| `room-photos` | Privat: pemilik project + staff | `<project_id>/<file>` |
+| `reports` | Privat: pemilik project + staff, tidak bisa dihapus | `<project_id>/<file>` |
 
-Secret yang terpasang: `IMAGEKIT_PUBLIC_KEY`, `IMAGEKIT_PRIVATE_KEY`, `IMAGEKIT_URL_ENDPOINT`, `IMAGEKIT_ROOT_FOLDER` (`/renovin/dev`), dan `ALLOWED_ORIGINS` (`http://localhost:3000`).
-
-**Setup ulang di laptop lain:** salin `supabase/functions/.env.example` menjadi `supabase/functions/.env`, lalu isi nilainya dari password manager.
-
-**Mengubah secret** (misalnya menambah domain production web ke `ALLOWED_ORIGINS`, dipisah koma): edit `supabase/functions/.env`, lalu jalankan:
-
-```bash
-npm run secrets:set
-```
-
-Tidak perlu deploy ulang. Deploy ulang (`npm run functions:deploy`) hanya diperlukan kalau **kode** di `supabase/functions/` berubah.
-
-**Cek tanpa login** (harus `401`):
-
-```bash
-curl -i https://yblaopjkopdrrnwrxgqt.supabase.co/functions/v1/imagekit-auth
-```
-
-**Rotasi key ImageKit** (kalau bocor, atau ada anggota tim yang keluar):
-1. Dashboard ImageKit → Developer options → API keys → **Roll API keys**. Pilih masa tenggang terpendek.
-2. Isi key baru ke `supabase/functions/.env`, lalu `npm run secrets:set`.
-3. **Jangan pernah** mengirim screenshot yang menampilkan private key. Kalau terpaksa, crop bagian itu, jangan dicoret.
-
-Untuk `renovin-prod` nanti, buat **key ImageKit terpisah** (`supabase-renovin-prod`) dengan `IMAGEKIT_ROOT_FOLDER=/renovin/prod`.
+- **Kuota Supabase Free: 1 GB.** Kompres foto di aplikasi sebelum upload (≤ 1600 px sisi terpanjang, JPEG/WebP).
+- **Tes sebelum dipakai customer:** buka `https://yblaopjkopdrrnwrxgqt.supabase.co/storage/v1/version` di jaringan Telkomsel/by.U/IndiHome. Kalau muncul halaman "Internet Baik", domain Supabase juga diblokir dan perlu domain sendiri.
 
 ### Akun uji (seed, khusus dev)
 
@@ -337,80 +313,32 @@ Setelah login, panggil `supabase.rpc('my_role')`. Kalau hasilnya `customer`, lan
 | Koreksi RAB | `update` kolom `adjustment`, `adjustment_note`, `notes` di `rabs`, atau insert/update/delete `rab_line_items`. Total dihitung otomatis oleh database |
 | Ubah role user | `supabase.rpc('set_user_role', { p_user_id, p_role })` (khusus super admin) |
 | Notifikasi & chat realtime | `supabase.channel(...).on('postgres_changes', { table: 'notifications' \| 'messages' })` |
-| Upload gambar | `supabase.functions.invoke('imagekit-auth')` untuk mendapatkan `token`, `expire`, `signature`, `publicKey`, `folders`, lalu upload ke ImageKit dan simpan `file_id` + URL ke tabel |
-| Laporan PDF | Route Handler membaca `rab_snapshots.data`, membuat PDF, upload ke ImageKit, lalu upsert `reports` (`on conflict snapshot_id`), dan terakhir `change_project_status(..., 'report_generated')` |
+| Upload file | `uploadFile(file, bucket, folder)` di `lib/storage.ts` → simpan `path` ke kolom `*_file_id` dan `url` ke kolom `*_url` |
+| Tampilkan file privat | `getFileUrl(bucket, path)` → signed URL yang kedaluwarsa (default 1 jam) |
+| Laporan PDF | Route Handler membaca `rab_snapshots.data`, membuat PDF, upload ke bucket `reports` (`<project_id>/...`), lalu upsert `reports` (`on conflict snapshot_id`), dan terakhir `change_project_status(..., 'report_generated')` |
 
-Contoh helper upload. Simpan misalnya di `src/lib/imagekit.ts`, lalu pakai di semua halaman yang ada upload-nya:
-
-```ts
-import type { SupabaseClient } from '@supabase/supabase-js'
-
-type UploadKind = 'catalog' | 'reports'
-
-const RULES: Record<UploadKind, { types: string[]; maxMb: number }> = {
-  catalog: { types: ['image/jpeg', 'image/png', 'image/webp'], maxMb: 5 },
-  reports: { types: ['application/pdf'], maxMb: 10 },
-}
-
-export async function uploadToImageKit(
-  supabase: SupabaseClient,
-  file: File | Blob,
-  fileName: string,
-  kind: UploadKind,
-): Promise<{ fileId: string; url: string }> {
-  // 1. Validasi sebelum upload, supaya user dapat pesan yang jelas
-  const rule = RULES[kind]
-  if (!rule.types.includes(file.type)) {
-    throw new Error(`Tipe file tidak didukung (${file.type || 'tidak diketahui'})`)
-  }
-  if (file.size > rule.maxMb * 1024 * 1024) {
-    throw new Error(`Ukuran file maksimal ${rule.maxMb} MB`)
-  }
-
-  // 2. Minta izin upload sekali pakai (wajib login)
-  const { data: auth, error } = await supabase.functions.invoke('imagekit-auth')
-  if (error) throw new Error('Gagal meminta izin upload. Coba login ulang.')
-
-  // 3. Kirim file ke ImageKit
-  const form = new FormData()
-  form.append('file', file)
-  form.append('fileName', fileName)
-  form.append('publicKey', auth.publicKey)
-  form.append('signature', auth.signature)
-  form.append('expire', String(auth.expire))
-  form.append('token', auth.token)
-  form.append('folder', auth.folders[kind])
-
-  const res = await fetch('https://upload.imagekit.io/api/v1/files/upload', { method: 'POST', body: form })
-  const uploaded = await res.json()
-
-  // 4. Jangan lanjut menyimpan ke database kalau upload gagal
-  if (!res.ok || !uploaded.fileId) {
-    throw new Error(uploaded.message ?? 'Upload ke ImageKit gagal')
-  }
-
-  return { fileId: uploaded.fileId, url: uploaded.url }
-}
-```
-
-Contoh pemakaian di form produk:
+Helper upload ada di `renovin-web/lib/storage.ts`. Contoh pemakaian:
 
 ```ts
-const { fileId, url } = await uploadToImageKit(supabase, file, file.name, 'catalog')
-await supabase.from('products').update({ image_file_id: fileId, image_url: url }).eq('id', productId)
+import { uploadFile, getFileUrl } from '@/lib/storage'
+
+// Gambar katalog (bucket publik): url langsung bisa dipakai di <Image>
+const { path, url } = await uploadFile(file, 'catalog', `products/${productId}`)
+await supabase.from('products').update({ image_file_id: path, image_url: url }).eq('id', productId)
+
+// Foto ruangan / PDF (bucket privat): url = path, tampilkan lewat signed URL
+const foto = await uploadFile(file, 'room-photos', projectId)
+const linkSementara = await getFileUrl('room-photos', foto.path)
 ```
 
-Folder yang dikembalikan `imagekit-auth` (`auth.folders`):
-
-| Key | Folder (dev) | Untuk |
+| Bucket | Folder | Tipe & batas |
 |---|---|---|
-| `catalog` | `/renovin/dev/catalog` | Gambar & aset PNG produk |
-| `reports` | `/renovin/dev/reports` | PDF laporan final |
-| `user` | `/renovin/dev/users/<id-user>` | File milik user, misalnya foto ruangan dari Android |
+| `catalog` | `products/<product_id>` | JPEG/PNG/WebP, 5 MB |
+| `room-photos` | `<project_id>` | JPEG/PNG/WebP, 10 MB |
+| `reports` | `<project_id>` | PDF, 10 MB |
 
-- Satu token hanya berlaku untuk **satu upload** dan kedaluwarsa dalam 30 menit. Helper di atas meminta token baru setiap kali dipanggil.
-- Simpan `fileId` (ke kolom `*_file_id`) dan `url` (ke kolom `*_url`). `fileId` diperlukan untuk menghapus atau mengganti file nanti.
-- **Tes pertama:** kalau muncul *CORS error* di console browser, catat nama header yang ditolak dan kabari backend, supaya header itu ditambahkan ke daftar yang diizinkan. Kalau ImageKit menolak signature, kabari backend juga.
+- Upload ditolak (pesan `new row violates row-level security policy`) kalau user tidak berhak, misalnya customer menulis ke project orang lain, atau path tidak diawali `project_id`.
+- Signed URL kedaluwarsa, jadi **jangan disimpan ke database**. Simpan path-nya, dan buat signed URL baru setiap kali ditampilkan.
 
 Error dari RPC berupa pesan bahasa Indonesia (misalnya "RAB belum dihitung atau masih kosong"), jadi bisa langsung ditampilkan di toast.
 
@@ -465,13 +393,13 @@ Issue fitur ──► Backend: migration → PR → review → merge → db push
 | # | Fitur | Backend | Web | Ref FSD |
 |---|---|---|---|---|
 | 1 | Login & layout | ✅ siap | Login, proxy, layout, tolak customer | §5 |
-| 2 | Katalog | ✅ data + upload gambar (`imagekit-auth`) | CRUD produk, harga internal, aktif/nonaktif | FS-15 |
+| 2 | Katalog | ✅ data · ⏳ upload gambar (bucket `catalog`, setelah `db push`) | CRUD produk, harga internal, aktif/nonaktif | FS-15 |
 | 3 | Tarif & pajak | ✅ | Halaman pengaturan | §7 |
 | 4 | Daftar & detail project | ✅ (seed P1–P5) | Daftar per status, before/after, timeline | FS-08 |
 | 5 | Workflow status | ✅ `change_project_status` + notifikasi | Tombol aksi sesuai status & role | §8 |
 | 6 | RAB draft & koreksi | ✅ `calculate_rab` + audit | Halaman RAB, edit baris, adjustment | FS-09, FS-11 |
 | 7 | Approval super admin | ✅ | Antrean + Approve/Correction/Reject (catatan wajib) | FS-10 |
-| 8 | Confirm final & PDF | ✅ snapshot + upload PDF (`imagekit-auth`) | Confirm, generate PDF, download | FS-12, FS-13 |
+| 8 | Confirm final & PDF | ✅ snapshot · ⏳ upload PDF (bucket `reports`, setelah `db push`) | Confirm, generate PDF, download | FS-12, FS-13 |
 | 9 | Chat | ✅ in-app · ⏳ WhatsApp | Daftar percakapan + pesan realtime | FS-14 |
 
 ---
@@ -530,7 +458,7 @@ Deploy ke prod tetap **manual**, mengikuti urutan rilis di dokumen Stack: backen
   - tidak ada backup otomatis yang bisa diunduh. Untuk prod, rencanakan backup manual atau upgrade.
 - **Label `main PRODUCTION`** di dashboard Supabase berasal dari fitur Branching, dan bisa diabaikan. Pemisahan dev/prod kita memakai project terpisah.
 - **Vercel Hobby melarang penggunaan komersial.** Untuk project client pilih Vercel Pro, Netlify, atau Cloudflare.
-- **Foto di ImageKit masih publik** bagi siapa pun yang tahu URL-nya. Rencananya foto customer di-upload sebagai *private file* dan dibuka lewat signed URL ([decisions.md](decisions.md)).
+- **ImageKit diblokir di jaringan Telkom Group.** Domain bersama `ik.imagekit.io` diblokir "Internet Baik" (dites 10 Okt 2026: by.U diblokir, XL bisa). Karena itu file dipindah ke Supabase Storage. Pelajaran: layanan yang menyajikan file lewat **domain bersama** berisiko ikut terblokir karena pengguna lain.
 - **AI segmentasi (SAM)** tidak bisa jalan di edge function. Ini hanya untuk alur Android, dan harus diputuskan sebelum fase mobile: on-device, API pihak ketiga, atau service Python terpisah.
 - **Dokumen Stack lama** masih memakai nama `namaapp-frontend` / `namaapp-mobile`, `src/pages/`, dan branch `develop`. Yang berlaku adalah panduan ini.
 
@@ -544,13 +472,13 @@ Deploy ke prod tetap **manual**, mengikuti urutan rilis di dokumen Stack: backen
 - [ ] Rivaldy mendapat Project URL + publishable key
 - [ ] Rivaldy diundang ke Supabase org (opsional, role terbatas)
 - [ ] Password DB tersimpan di password manager
-- [x] Akun ImageKit + key tersimpan
 - [ ] Hosting web dipilih
 
 **Backend**
 - [x] Migration + seed di `renovin-dev`
 - [x] Tipe database ter-generate
-- [x] `imagekit-auth` di-deploy + secret diset
+- [ ] Migration storage di-push ke `renovin-dev`
+- [ ] Domain Supabase dites di jaringan Telkomsel/by.U
 - [x] CI migration di GitHub Actions
 - [ ] CI dijadikan *required status check* di branch protection
 - [ ] Signed URL foto private
@@ -559,10 +487,10 @@ Deploy ke prod tetap **manual**, mengikuti urutan rilis di dokumen Stack: backen
 - [ ] Next.js + shadcn jalan di `localhost:3000`
 - [ ] Login admin berhasil, customer ditolak
 - [ ] Tipe database disalin dari backend
-- [ ] Upload gambar katalog via `imagekit-auth` berhasil (tes pertama dengan user login)
+- [ ] Upload gambar katalog ke bucket `catalog` berhasil (tes pertama dengan user login)
 - [ ] CI build
 
 **Keputusan**
 - [ ] Asumsi di [decisions.md](decisions.md) dikonfirmasi client
 - [ ] Siapa yang mengerjakan `renovin-android`
-- [ ] Kepemilikan akun (Supabase, GitHub, ImageKit, domain, Play Console)
+- [ ] Kepemilikan akun (Supabase, GitHub, domain, Play Console)
