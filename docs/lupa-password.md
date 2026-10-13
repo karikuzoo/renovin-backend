@@ -103,9 +103,11 @@ Jawaban function:
 
 | Kondisi | HTTP | Body |
 |---|---|---|
-| Email valid (admin, bukan admin, atau tidak terdaftar) | 200 | `{ "message": "Jika email terdaftar sebagai admin, …" }` |
+| Email valid (admin, bukan admin, atau tidak terdaftar) | 200 | `{ "message": "Link untuk mengatur ulang kata sandi sudah dikirim ke email tersebut." }` |
 | Format email salah | 400 | `{ "error": "Format email tidak valid" }` |
 | Body bukan JSON | 400 | `{ "error": "Format permintaan tidak valid" }` |
+
+Pesan 200 **sama untuk semua email**, termasuk yang tidak dikirimi apa pun (customer atau tidak terdaftar), supaya email admin tidak bisa ditebak. Disarankan FE menambahkan petunjuk di bawahnya, misalnya: *"Tidak menerima email dalam beberapa menit? Pastikan email yang dimasukkan adalah email akun admin, lalu cek folder Spam."*
 
 Contoh kode di bawah **sudah dites** di salinan `renovin-web` (commit `a2e66dd`): lint, `tsc`, dan build lolos; `/auth/confirm` dengan token salah diarahkan ke `/lupa-password?error=link-tidak-valid`, dan `next` ke situs luar ditolak. Tampilannya sengaja polos; silakan disesuaikan dengan desain.
 
