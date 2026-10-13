@@ -58,7 +58,8 @@ renovin-android ───────┘   (Singapore)        ├─► Realtime
 | Server Express lama dihapus | ✅ |
 | Supabase Storage: bucket `catalog`, `room-photos`, `reports` + aturan akses | ✅ Live di `renovin-dev` (10 Okt 2026). Domain storage dites bisa diakses di by.U |
 | Foto customer & PDF privat (signed URL) | ✅ Tercakup oleh bucket privat + RLS |
-| Lupa password admin: edge function + template email | ⏳ Kode siap; perlu setup Gmail SMTP + deploy ([lupa-password.md](lupa-password.md)) |
+| Lupa password admin: edge function + template email + Gmail SMTP | ✅ Live di `renovin-dev` (13 Okt 2026). Email customer & tak terdaftar ditolak dengan jawaban seragam ([lupa-password.md](lupa-password.md)) |
+| Lupa password admin: halaman web (`/lupa-password`, `/auth/confirm`, `/reset-password`) | ⏳ Dikerjakan FE (`renovin-web`) |
 | Notifikasi WhatsApp | ⏳ Menunggu pilihan provider |
 | Konfirmasi asumsi ke client ([decisions.md](decisions.md)) | ⏳ |
 | Supabase `renovin-prod` | ⏳ Dibuat menjelang rilis |
@@ -481,6 +482,7 @@ Deploy ke prod tetap **manual**, mengikuti urutan rilis di dokumen Stack: backen
 - [x] Migration storage di-push ke `renovin-dev`
 - [x] Domain Supabase dites di jaringan Telkomsel/by.U
 - [x] CI migration di GitHub Actions
+- [x] Lupa password admin: Gmail SMTP, template email, edge function `request-password-reset` di `renovin-dev`
 - [ ] CI dijadikan *required status check* di branch protection
 - [ ] Signed URL foto private
 
