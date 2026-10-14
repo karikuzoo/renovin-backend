@@ -89,6 +89,13 @@ export type Database = {
             foreignKeyName: "approvals_project_id_fkey"
             columns: ["project_id"]
             isOneToOne: false
+            referencedRelation: "admin_orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "approvals_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
             referencedRelation: "projects"
             referencedColumns: ["id"]
           },
@@ -174,6 +181,13 @@ export type Database = {
             foreignKeyName: "conversations_project_id_fkey"
             columns: ["project_id"]
             isOneToOne: false
+            referencedRelation: "admin_orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conversations_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
             referencedRelation: "projects"
             referencedColumns: ["id"]
           },
@@ -235,6 +249,13 @@ export type Database = {
             columns: ["product_id"]
             isOneToOne: false
             referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "furniture_placements_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "admin_orders"
             referencedColumns: ["id"]
           },
           {
@@ -323,6 +344,13 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "notifications_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "admin_orders"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "notifications_project_id_fkey"
             columns: ["project_id"]
@@ -559,6 +587,13 @@ export type Database = {
             columns: ["changed_by"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_status_history_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "admin_orders"
             referencedColumns: ["id"]
           },
           {
@@ -807,6 +842,13 @@ export type Database = {
             foreignKeyName: "rab_snapshots_project_id_fkey"
             columns: ["project_id"]
             isOneToOne: false
+            referencedRelation: "admin_orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rab_snapshots_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
             referencedRelation: "projects"
             referencedColumns: ["id"]
           },
@@ -882,6 +924,13 @@ export type Database = {
             foreignKeyName: "rabs_project_id_fkey"
             columns: ["project_id"]
             isOneToOne: true
+            referencedRelation: "admin_orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rabs_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: true
             referencedRelation: "projects"
             referencedColumns: ["id"]
           },
@@ -928,6 +977,13 @@ export type Database = {
             columns: ["generated_by"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reports_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "admin_orders"
             referencedColumns: ["id"]
           },
           {
@@ -1007,6 +1063,13 @@ export type Database = {
             foreignKeyName: "room_measurements_project_id_fkey"
             columns: ["project_id"]
             isOneToOne: false
+            referencedRelation: "admin_orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "room_measurements_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
             referencedRelation: "projects"
             referencedColumns: ["id"]
           },
@@ -1060,6 +1123,13 @@ export type Database = {
           width?: number | null
         }
         Relationships: [
+          {
+            foreignKeyName: "room_photos_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "admin_orders"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "room_photos_project_id_fkey"
             columns: ["project_id"]
@@ -1164,6 +1234,13 @@ export type Database = {
             foreignKeyName: "wall_paints_project_id_fkey"
             columns: ["project_id"]
             isOneToOne: false
+            referencedRelation: "admin_orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "wall_paints_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
             referencedRelation: "projects"
             referencedColumns: ["id"]
           },
@@ -1171,7 +1248,47 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      admin_orders: {
+        Row: {
+          assigned_admin_id: string | null
+          assigned_admin_name: string | null
+          code: string | null
+          cover_photo_path: string | null
+          customer_email: string | null
+          customer_id: string | null
+          customer_name: string | null
+          customer_phone: string | null
+          id: string | null
+          measurement_count: number | null
+          notes: string | null
+          order_value: number | null
+          photo_count: number | null
+          rab_calculated_at: string | null
+          room_type: string | null
+          status: Database["public"]["Enums"]["project_status"] | null
+          status_group: Database["public"]["Enums"]["order_status_group"] | null
+          submitted_at: string | null
+          title: string | null
+          total_area: number | null
+          updated_at: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "projects_assigned_admin_id_fkey"
+            columns: ["assigned_admin_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "projects_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       calculate_rab: {
@@ -1245,6 +1362,10 @@ export type Database = {
         Args: never
         Returns: Database["public"]["Enums"]["user_role"]
       }
+      order_status_group_of: {
+        Args: { p_status: Database["public"]["Enums"]["project_status"] }
+        Returns: Database["public"]["Enums"]["order_status_group"]
+      }
       set_user_role: {
         Args: {
           p_role: Database["public"]["Enums"]["user_role"]
@@ -1270,11 +1391,13 @@ export type Database = {
         Args: { p_project_id: string }
         Returns: boolean
       }
+      storage_project_id: { Args: { p_name: string }; Returns: string }
     }
     Enums: {
       approval_decision: "approved" | "correction" | "rejected"
       conversation_status: "open" | "closed"
       measurement_area_type: "wall" | "floor" | "ceiling" | "other"
+      order_status_group: "new" | "in_progress" | "done" | "rejected"
       product_type: "paint" | "furniture" | "material" | "other"
       project_status:
         | "draft"
@@ -1422,6 +1545,7 @@ export const Constants = {
       approval_decision: ["approved", "correction", "rejected"],
       conversation_status: ["open", "closed"],
       measurement_area_type: ["wall", "floor", "ceiling", "other"],
+      order_status_group: ["new", "in_progress", "done", "rejected"],
       product_type: ["paint", "furniture", "material", "other"],
       project_status: [
         "draft",
