@@ -198,6 +198,8 @@ await supabase
 
 Fungsi ini selalu mengembalikan **tepat satu baris**, jadi pakai `.single()` supaya `data` berupa objek, bukan array.
 
+> **Perhatikan `last_completed_at`:** di `database.types.ts` kolom ini tertulis `string`, padahal nilainya **bisa `null`** (belum ada pesanan selesai). Ini keterbatasan generator tipe Supabase untuk fungsi. Tetap cek dulu, misalnya `summary.last_completed_at ? formatTanggal(summary.last_completed_at) : "Belum ada serah terima"`.
+
 ### Kolom
 
 | Kolom | Tipe | Arti | Dipakai di kartu |
