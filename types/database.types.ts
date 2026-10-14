@@ -1356,6 +1356,21 @@ export type Database = {
         Args: { p_project_id: string }
         Returns: boolean
       }
+      dashboard_summary: {
+        Args: { p_from?: string; p_to?: string }
+        Returns: {
+          done_orders: number
+          generated_at: string
+          in_progress_by_status: Json
+          in_progress_orders: number
+          last_completed_at: string
+          new_orders: number
+          rejected_orders: number
+          total_order_value: number
+          total_orders: number
+          valued_orders: number
+        }[]
+      }
       is_staff: { Args: never; Returns: boolean }
       is_super_admin: { Args: never; Returns: boolean }
       my_role: {

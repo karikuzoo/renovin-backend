@@ -1,25 +1,16 @@
-# Data untuk web admin (kontrak FE)
+# Kontrak FE: daftar pesanan (`admin_orders`)
 
-Dokumen ini menjelaskan **data siap pakai** dari backend untuk halaman-halaman di `renovin-web/app/workplace`. Isinya per halaman: apa yang dipanggil, arti tiap kolom, dan contoh hasilnya.
+Dipakai halaman **Dashboard** (daftar proyek), **Pesanan**, dan **Pesanan Baru** di `renovin-web/app/workplace`.
 
-Semua pemanggilan memakai client Supabase yang sudah ada (`@/lib/supabase/client` atau `@/lib/supabase/server`). Tipe TypeScript-nya ada di `types/database.types.ts`. Salin ulang file itu dari repo backend setiap kali dokumen ini berubah.
+Semua pemanggilan memakai client Supabase yang sudah ada (`@/lib/supabase/client` atau `@/lib/supabase/server`). Tipe TypeScript-nya ada di `types/database.types.ts`. Salin ulang file itu dari repo backend setiap kali kontrak ini berubah.
 
-| Halaman | Sumber data | Status |
-|---|---|---|
-| Dashboard, Pesanan, Pesanan Baru | view `admin_orders` | ✅ Tersedia |
-| Ringkasan angka dashboard | — | ⏳ Menyusul |
-| Klien | — | ⏳ Menyusul |
-| Pembayaran, tukang, tahap produksi/instalasi, progres % | — | 🔒 Menunggu keputusan client. Tetap pakai data contoh dulu |
-
----
-
-## `admin_orders` — daftar pesanan
+Kontrak data web admin lainnya: lihat daftar di README repo backend.
 
 Satu baris = satu project yang **sudah dikirim** customer. Project `draft` dan `ready_to_submit` tidak pernah muncul.
 
 **Siapa yang bisa membaca:** hanya `admin` dan `super_admin`. Customer yang memanggil view ini selalu mendapat **daftar kosong** (bukan error). Pengguna yang belum login mendapat error `permission denied`.
 
-### Contoh pemanggilan
+## Contoh pemanggilan
 
 ```ts
 import { createClient } from "@/lib/supabase/client";
@@ -52,7 +43,7 @@ await supabase
 await supabase.from("admin_orders").select("*").eq("id", projectId).single();
 ```
 
-### Kolom
+## Kolom
 
 | Kolom | Tipe | Arti |
 |---|---|---|
@@ -82,7 +73,7 @@ await supabase.from("admin_orders").select("*").eq("id", projectId).single();
 >
 > **Semua kolom view bertipe `… | null` di TypeScript.** Ini aturan umum Supabase untuk view, bukan berarti datanya kosong. Kolom yang **benar-benar** bisa `null` hanya yang ditandai di tabel di atas. Untuk kolom lain, aman memakai `row.code!` atau memberi nilai cadangan.
 
-### Kelompok status (tab)
+## Kelompok status (tab)
 
 | `status_group` | Label tab yang disarankan | Status yang termasuk |
 |---|---|---|
@@ -106,7 +97,7 @@ Label badge untuk `status` detail (disarankan):
 | `report_generated` | Laporan dibuat |
 | `completed` | Selesai |
 
-### Menampilkan foto sampul
+## Menampilkan foto sampul
 
 Foto ruangan disimpan di bucket **privat** `room-photos`, jadi `cover_photo_path` berisi **path**, bukan URL. Ubah dulu menjadi signed URL:
 
@@ -129,14 +120,14 @@ if (path) {
 
 Untuk banyak foto sekaligus, pakai `createSignedUrls(paths, 3600)` supaya cukup satu request.
 
-### Aksi dari daftar pesanan
+## Aksi dari daftar pesanan
 
 | Tombol | Panggilan |
 |---|---|
 | "Terima pesanan" (status `sent_to_admin`) | `supabase.rpc("change_project_status", { p_project_id: id, p_to_status: "admin_processing" })`. Admin yang menekan otomatis menjadi penanggung jawab |
 | "Hubungi klien" | Chat: tabel `conversations` dan `messages` |
 
-### Contoh hasil
+## Contoh hasil
 
 ```json
 {
@@ -164,7 +155,7 @@ Untuk banyak foto sekaligus, pakai `createSignedUrls(paths, 3600)` supaya cukup 
 }
 ```
 
-### Belum tersedia di `admin_orders`
+## Belum tersedia di `admin_orders`
 
 Bagian di desain web berikut **belum ada datanya**. Tetap pakai data contoh atau sembunyikan dulu:
 
