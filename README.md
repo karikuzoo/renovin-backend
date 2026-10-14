@@ -8,7 +8,7 @@ File (foto, aset katalog, PDF) disimpan di **Supabase Storage** (bucket `catalog
 - Struktur tabel & hak akses: [docs/erd.md](docs/erd.md)
 - Asumsi yang masih menunggu konfirmasi client: [docs/decisions.md](docs/decisions.md)
 - Lupa password admin (setup Gmail SMTP + kontrak FE): [docs/lupa-password.md](docs/lupa-password.md)
-- Data untuk halaman web admin (view `admin_orders`, kontrak FE): [docs/contract-data-admin-web.md](docs/contract-data-admin-web.md)
+- Data untuk halaman web admin (view `admin_orders`, fungsi `dashboard_summary`, kontrak FE): [docs/contract-data-admin-web.md](docs/contract-data-admin-web.md)
 
 ## Struktur
 
