@@ -78,7 +78,9 @@ await supabase.from("admin_orders").select("*").eq("id", projectId).single();
 | `cover_photo_path` | text \| null | Foto pertama project (lihat cara menampilkan di bawah). `null` = belum ada foto |
 | `photo_count` | number | Jumlah foto ruangan |
 
-> **Angka `numeric` datang sebagai string** dari Supabase, misalnya `"6210450.00"`. Ubah dengan `Number(row.order_value)` sebelum diformat, contohnya `new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(Number(v))`.
+> **Format rupiah:** `order_value` dan `total_area` datang sebagai number (misalnya `6210450` atau `2180572.8`). Format dengan `new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(row.order_value)`.
+>
+> **Semua kolom view bertipe `… | null` di TypeScript.** Ini aturan umum Supabase untuk view, bukan berarti datanya kosong. Kolom yang **benar-benar** bisa `null` hanya yang ditandai di tabel di atas. Untuk kolom lain, aman memakai `row.code!` atau memberi nilai cadangan.
 
 ### Kelompok status (tab)
 
@@ -153,9 +155,9 @@ Untuk banyak foto sekaligus, pakai `createSignedUrls(paths, 3600)` supaya cukup 
   "customer_phone": "081200000003",
   "assigned_admin_id": "…",
   "assigned_admin_name": "Admin Renovin",
-  "order_value": "6210450.00",
+  "order_value": 6210450,
   "rab_calculated_at": "2026-10-12T05:40:00+00:00",
-  "total_area": "15.000",
+  "total_area": 15,
   "measurement_count": 1,
   "cover_photo_path": "https://placehold.co/1200x800/png?text=Ruang+Keluarga+-+Asli",
   "photo_count": 1
