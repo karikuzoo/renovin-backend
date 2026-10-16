@@ -11,6 +11,7 @@ File (foto, aset katalog, PDF) disimpan di **Supabase Storage** (bucket `catalog
 - Kontrak FE web admin (satu file per fitur):
   - Daftar pesanan, view `admin_orders`: [docs/contract-admin-orders.md](docs/contract-admin-orders.md)
   - Ringkasan dashboard, fungsi `dashboard_summary`: [docs/contract-dashboard-summary.md](docs/contract-dashboard-summary.md)
+  - Daftar klien, view `admin_clients`: [docs/contract-admin-clients.md](docs/contract-admin-clients.md)
 
 ## Struktur
 

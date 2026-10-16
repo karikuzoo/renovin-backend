@@ -29,6 +29,7 @@ Status: ⏳ = menunggu konfirmasi client, ✅ = sudah disepakati.
 | Q8 | Kapan RAB boleh diedit | Staff: `admin_processing`, `rab_draft`, `correction`. Super admin juga saat `pending_approval`. Terkunci setelah `approved` | `public.can_edit_rab` | ⏳ |
 | Q9 | Data minimum submit | Minimal 1 foto ruangan. Ukuran opsional (PRD: "input ukuran opsional") | `change_project_status` | ⏳ |
 | Q10 | Revisi setelah confirmed | Belum ada. Kolom `rab_snapshots.version` sudah disiapkan untuk revisi nanti | — | ⏳ |
+| Q11 | Harga produk di katalog | Setiap produk **wajib** punya harga (`products.price_customer` NOT NULL). "Harga belum final" di halaman Katalog web berarti **total harga proyek** (RAB = material + jasa + adjustment + pajak) yang baru diketahui setelah admin menghitung RAB, bukan harga produk | `products` (migration 002), `calculate_rab` | ✅ Diputuskan tim (16 Okt 2026) |
 
 ## Catatan keamanan
 
