@@ -230,6 +230,8 @@ Dibuat oleh migration `..._storage.sql`. Detail bucket, path, dan hak akses ada 
 | `admin@renovin.test` | admin |
 | `customer1@renovin.test` | customer (P1 `draft`, P2 `sent_to_admin`, P3 `rab_draft`) |
 | `customer2@renovin.test` | customer (P4 `pending_approval`, P5 `approved`) |
+| `admin2@renovin.test` | admin (Nadia Anggraini) |
+| `customer3@renovin.test` … `customer8@renovin.test` | customer (P6–P15: pesanan baru, semua tahap pengerjaan, selesai, ditolak). Rinciannya ada di README |
 
 Password ada di komentar paling atas `supabase/seed.sql`. **Seed tidak pernah dijalankan di prod.**
 
