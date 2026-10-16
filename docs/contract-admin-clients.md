@@ -106,7 +106,7 @@ Data klien saat ini masih sedikit, jadi kartu bisa dihitung dari hasil daftar (`
 | Tombol | Panggilan |
 |---|---|
 | "Hubungi klien" | Chat: tabel `conversations` dan `messages` |
-| "Ubah profil" | ❌ Belum tersedia. Admin belum boleh mengubah profil customer (menunggu keputusan tim: data apa saja yang boleh diubah admin). Sembunyikan atau nonaktifkan tombolnya dulu |
+| "Ubah profil" | Tidak ada. **Tombolnya dihapus** (keputusan tim, 16 Okt 2026): admin tidak mengubah profil customer |
 | "Ekspor data" | Bisa dibuat di FE dari hasil daftar, misalnya diekspor ke CSV |
 
 ## Contoh hasil
@@ -146,4 +146,3 @@ Bagian di desain halaman Klien berikut **belum ada datanya**. Tetap pakai data c
 - "Preferensi & catatan" klien
 - Progres % dan target selesai di "Proyek terkait" 🔒
 - Status pembayaran ("DP 50%") 🔒
-- "Ubah profil" oleh admin

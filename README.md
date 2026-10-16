@@ -67,6 +67,15 @@ Password semua akun ada di komentar paling atas `supabase/seed.sql`.
 | `admin@renovin.test` | admin | — |
 | `customer1@renovin.test` | customer | P1 `draft`, P2 `sent_to_admin`, P3 `rab_draft` |
 | `customer2@renovin.test` | customer | P4 `pending_approval`, P5 `approved` |
+| `admin2@renovin.test` | admin | Nadia Anggraini, penanggung jawab P10, P11, P13, P15 |
+| `customer3@renovin.test` | customer | Sarah Wijaya: P9 `correction`, P11 `report_generated` |
+| `customer4@renovin.test` | customer | Ari Wibowo: P10 `confirmed`, P13 `completed` |
+| `customer5@renovin.test` | customer | Dimas Putra: P6 `sent_to_admin`, P14 `rejected` |
+| `customer6@renovin.test` | customer | Maya Lestari: P7 `sent_to_admin`, P15 `admin_processing` |
+| `customer7@renovin.test` | customer | Rina Kusuma: P12 `completed` |
+| `customer8@renovin.test` | customer | Hendra Gunawan: P8 `ready_to_submit` (belum pernah mengirim pesanan) |
+
+Total 15 project yang mencakup semua status. Rinciannya ada di komentar `supabase/seed.sql`.
 
 ## Alur kerja perubahan database
 
