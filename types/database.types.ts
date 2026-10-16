@@ -41,6 +41,13 @@ export type Database = {
             foreignKeyName: "app_settings_updated_by_fkey"
             columns: ["updated_by"]
             isOneToOne: false
+            referencedRelation: "admin_clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "app_settings_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -82,8 +89,22 @@ export type Database = {
             foreignKeyName: "approvals_decided_by_fkey"
             columns: ["decided_by"]
             isOneToOne: false
+            referencedRelation: "admin_clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "approvals_decided_by_fkey"
+            columns: ["decided_by"]
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "approvals_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "admin_clients"
+            referencedColumns: ["related_order_id"]
           },
           {
             foreignKeyName: "approvals_project_id_fkey"
@@ -174,8 +195,22 @@ export type Database = {
             foreignKeyName: "conversations_customer_id_fkey"
             columns: ["customer_id"]
             isOneToOne: false
+            referencedRelation: "admin_clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conversations_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conversations_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "admin_clients"
+            referencedColumns: ["related_order_id"]
           },
           {
             foreignKeyName: "conversations_project_id_fkey"
@@ -255,6 +290,13 @@ export type Database = {
             foreignKeyName: "furniture_placements_project_id_fkey"
             columns: ["project_id"]
             isOneToOne: false
+            referencedRelation: "admin_clients"
+            referencedColumns: ["related_order_id"]
+          },
+          {
+            foreignKeyName: "furniture_placements_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
             referencedRelation: "admin_orders"
             referencedColumns: ["id"]
           },
@@ -307,6 +349,13 @@ export type Database = {
             foreignKeyName: "messages_sender_id_fkey"
             columns: ["sender_id"]
             isOneToOne: false
+            referencedRelation: "admin_clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_sender_id_fkey"
+            columns: ["sender_id"]
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -348,6 +397,13 @@ export type Database = {
             foreignKeyName: "notifications_project_id_fkey"
             columns: ["project_id"]
             isOneToOne: false
+            referencedRelation: "admin_clients"
+            referencedColumns: ["related_order_id"]
+          },
+          {
+            foreignKeyName: "notifications_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
             referencedRelation: "admin_orders"
             referencedColumns: ["id"]
           },
@@ -356,6 +412,13 @@ export type Database = {
             columns: ["project_id"]
             isOneToOne: false
             referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "admin_clients"
             referencedColumns: ["id"]
           },
           {
@@ -425,6 +488,13 @@ export type Database = {
             columns: ["product_id"]
             isOneToOne: true
             referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_internal_prices_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "admin_clients"
             referencedColumns: ["id"]
           },
           {
@@ -518,6 +588,13 @@ export type Database = {
             foreignKeyName: "products_created_by_fkey"
             columns: ["created_by"]
             isOneToOne: false
+            referencedRelation: "admin_clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "products_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -586,8 +663,22 @@ export type Database = {
             foreignKeyName: "project_status_history_changed_by_fkey"
             columns: ["changed_by"]
             isOneToOne: false
+            referencedRelation: "admin_clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_status_history_changed_by_fkey"
+            columns: ["changed_by"]
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_status_history_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "admin_clients"
+            referencedColumns: ["related_order_id"]
           },
           {
             foreignKeyName: "project_status_history_project_id_fkey"
@@ -674,7 +765,21 @@ export type Database = {
             foreignKeyName: "projects_assigned_admin_id_fkey"
             columns: ["assigned_admin_id"]
             isOneToOne: false
+            referencedRelation: "admin_clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "projects_assigned_admin_id_fkey"
+            columns: ["assigned_admin_id"]
+            isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "projects_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "admin_clients"
             referencedColumns: ["id"]
           },
           {
@@ -765,6 +870,13 @@ export type Database = {
             foreignKeyName: "rab_line_items_created_by_fkey"
             columns: ["created_by"]
             isOneToOne: false
+            referencedRelation: "admin_clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rab_line_items_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -835,8 +947,22 @@ export type Database = {
             foreignKeyName: "rab_snapshots_created_by_fkey"
             columns: ["created_by"]
             isOneToOne: false
+            referencedRelation: "admin_clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rab_snapshots_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rab_snapshots_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "admin_clients"
+            referencedColumns: ["related_order_id"]
           },
           {
             foreignKeyName: "rab_snapshots_project_id_fkey"
@@ -917,8 +1043,22 @@ export type Database = {
             foreignKeyName: "rabs_calculated_by_fkey"
             columns: ["calculated_by"]
             isOneToOne: false
+            referencedRelation: "admin_clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rabs_calculated_by_fkey"
+            columns: ["calculated_by"]
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rabs_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: true
+            referencedRelation: "admin_clients"
+            referencedColumns: ["related_order_id"]
           },
           {
             foreignKeyName: "rabs_project_id_fkey"
@@ -932,6 +1072,13 @@ export type Database = {
             columns: ["project_id"]
             isOneToOne: true
             referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rabs_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "admin_clients"
             referencedColumns: ["id"]
           },
           {
@@ -976,8 +1123,22 @@ export type Database = {
             foreignKeyName: "reports_generated_by_fkey"
             columns: ["generated_by"]
             isOneToOne: false
+            referencedRelation: "admin_clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reports_generated_by_fkey"
+            columns: ["generated_by"]
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reports_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "admin_clients"
+            referencedColumns: ["related_order_id"]
           },
           {
             foreignKeyName: "reports_project_id_fkey"
@@ -1056,8 +1217,22 @@ export type Database = {
             foreignKeyName: "room_measurements_created_by_fkey"
             columns: ["created_by"]
             isOneToOne: false
+            referencedRelation: "admin_clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "room_measurements_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "room_measurements_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "admin_clients"
+            referencedColumns: ["related_order_id"]
           },
           {
             foreignKeyName: "room_measurements_project_id_fkey"
@@ -1123,6 +1298,13 @@ export type Database = {
           width?: number | null
         }
         Relationships: [
+          {
+            foreignKeyName: "room_photos_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "admin_clients"
+            referencedColumns: ["related_order_id"]
+          },
           {
             foreignKeyName: "room_photos_project_id_fkey"
             columns: ["project_id"]
@@ -1234,6 +1416,13 @@ export type Database = {
             foreignKeyName: "wall_paints_project_id_fkey"
             columns: ["project_id"]
             isOneToOne: false
+            referencedRelation: "admin_clients"
+            referencedColumns: ["related_order_id"]
+          },
+          {
+            foreignKeyName: "wall_paints_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
             referencedRelation: "admin_orders"
             referencedColumns: ["id"]
           },
@@ -1248,6 +1437,36 @@ export type Database = {
       }
     }
     Views: {
+      admin_clients: {
+        Row: {
+          active_order_count: number | null
+          client_since: string | null
+          client_status: Database["public"]["Enums"]["client_status"] | null
+          done_order_count: number | null
+          email: string | null
+          full_name: string | null
+          id: string | null
+          last_order_at: string | null
+          new_order_count: number | null
+          order_count: number | null
+          phone: string | null
+          registered_at: string | null
+          rejected_order_count: number | null
+          related_order_admin_name: string | null
+          related_order_code: string | null
+          related_order_id: string | null
+          related_order_status:
+            | Database["public"]["Enums"]["project_status"]
+            | null
+          related_order_status_group:
+            | Database["public"]["Enums"]["order_status_group"]
+            | null
+          related_order_title: string | null
+          related_order_value: number | null
+          total_order_value: number | null
+        }
+        Relationships: []
+      }
       admin_orders: {
         Row: {
           assigned_admin_id: string | null
@@ -1277,7 +1496,21 @@ export type Database = {
             foreignKeyName: "projects_assigned_admin_id_fkey"
             columns: ["assigned_admin_id"]
             isOneToOne: false
+            referencedRelation: "admin_clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "projects_assigned_admin_id_fkey"
+            columns: ["assigned_admin_id"]
+            isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "projects_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "admin_clients"
             referencedColumns: ["id"]
           },
           {
@@ -1410,6 +1643,7 @@ export type Database = {
     }
     Enums: {
       approval_decision: "approved" | "correction" | "rejected"
+      client_status: "active" | "new" | "done" | "inactive"
       conversation_status: "open" | "closed"
       measurement_area_type: "wall" | "floor" | "ceiling" | "other"
       order_status_group: "new" | "in_progress" | "done" | "rejected"
@@ -1558,6 +1792,7 @@ export const Constants = {
   public: {
     Enums: {
       approval_decision: ["approved", "correction", "rejected"],
+      client_status: ["active", "new", "done", "inactive"],
       conversation_status: ["open", "closed"],
       measurement_area_type: ["wall", "floor", "ceiling", "other"],
       order_status_group: ["new", "in_progress", "done", "rejected"],
