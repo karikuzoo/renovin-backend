@@ -1524,6 +1524,29 @@ export type Database = {
       }
     }
     Functions: {
+      assign_project: {
+        Args: { p_admin_id: string; p_project_id: string }
+        Returns: {
+          assigned_admin_id: string | null
+          code: string
+          created_at: string
+          customer_id: string
+          final_snapshot_id: string | null
+          id: string
+          notes: string | null
+          room_type: string | null
+          status: Database["public"]["Enums"]["project_status"]
+          submitted_at: string | null
+          title: string
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "projects"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       calculate_rab: {
         Args: { p_project_id: string }
         Returns: {
