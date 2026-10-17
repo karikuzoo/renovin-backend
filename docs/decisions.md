@@ -31,6 +31,7 @@ Status: ⏳ = menunggu konfirmasi client, ✅ = sudah disepakati.
 | Q10 | Revisi setelah confirmed | Belum ada. Kolom `rab_snapshots.version` sudah disiapkan untuk revisi nanti | — | ⏳ |
 | Q11 | Harga produk di katalog | Setiap produk **wajib** punya harga (`products.price_customer` NOT NULL). "Harga belum final" di halaman Katalog web berarti **total harga proyek** (RAB = material + jasa + adjustment + pajak) yang baru diketahui setelah admin menghitung RAB, bukan harga produk | `products` (migration 002), `calculate_rab` | ✅ Diputuskan tim (16 Okt 2026) |
 | Q12 | Pindah penanggung jawab pesanan | **Super admin** boleh memindahkan pesanan siapa pun. **Admin** hanya boleh menyerahkan pesanan yang sedang ia tangani. Tidak berlaku untuk pesanan draft/ready_to_submit maupun completed/rejected. Status pesanan tidak berubah | `public.assign_project` (migration 012) | ⏳ |
+| Q13 | Siapa yang mengubah pengaturan | Profil studio & lokal (`studio_profile`, `locale`): admin dan super admin. **Pajak (`tax`): hanya super admin**, karena memengaruhi semua RAB baru. Logo boleh SVG (bucket publik `branding`) | `app_settings` policies, bucket `branding` (migration 013) | ⏳ |
 
 ## Catatan keamanan
 

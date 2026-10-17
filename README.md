@@ -13,6 +13,7 @@ File (foto, aset katalog, PDF) disimpan di **Supabase Storage** (bucket `catalog
   - Ringkasan dashboard, fungsi `dashboard_summary`: [docs/contract-dashboard-summary.md](docs/contract-dashboard-summary.md)
   - Daftar klien, view `admin_clients`: [docs/contract-admin-clients.md](docs/contract-admin-clients.md)
   - Pindah penanggung jawab pesanan, fungsi `assign_project`: [docs/contract-assign-project.md](docs/contract-assign-project.md)
+  - Pengaturan studio (profil, lokal, pajak, logo): [docs/contract-pengaturan-studio.md](docs/contract-pengaturan-studio.md)
 
 ## Struktur
 
