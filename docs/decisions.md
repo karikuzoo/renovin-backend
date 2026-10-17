@@ -30,6 +30,7 @@ Status: ⏳ = menunggu konfirmasi client, ✅ = sudah disepakati.
 | Q9 | Data minimum submit | Minimal 1 foto ruangan. Ukuran opsional (PRD: "input ukuran opsional") | `change_project_status` | ⏳ |
 | Q10 | Revisi setelah confirmed | Belum ada. Kolom `rab_snapshots.version` sudah disiapkan untuk revisi nanti | — | ⏳ |
 | Q11 | Harga produk di katalog | Setiap produk **wajib** punya harga (`products.price_customer` NOT NULL). "Harga belum final" di halaman Katalog web berarti **total harga proyek** (RAB = material + jasa + adjustment + pajak) yang baru diketahui setelah admin menghitung RAB, bukan harga produk | `products` (migration 002), `calculate_rab` | ✅ Diputuskan tim (16 Okt 2026) |
+| Q12 | Pindah penanggung jawab pesanan | **Super admin** boleh memindahkan pesanan siapa pun. **Admin** hanya boleh menyerahkan pesanan yang sedang ia tangani. Tidak berlaku untuk pesanan draft/ready_to_submit maupun completed/rejected. Status pesanan tidak berubah | `public.assign_project` (migration 012) | ⏳ |
 
 ## Catatan keamanan
 
