@@ -1,0 +1,34 @@
+<!--
+  Template email "Change Email Address" Renovin.
+  Lokal: dipakai otomatis lewat supabase/config.toml.
+  Cloud (renovin-dev / renovin-prod): salin isi file ini ke
+  Dashboard -> Authentication -> Emails -> Change Email Address.
+
+  Dengan "Secure email change" (default Supabase), email ini dikirim ke alamat LAMA
+  dan alamat BARU; email baru aktif setelah keduanya dikonfirmasi.
+
+  Link memakai token_hash supaya diverifikasi di server oleh renovin-web:
+  GET /auth/confirm?token_hash=...&type=email_change&next=/workplace/pengaturan
+-->
+<div style="font-family: Arial, Helvetica, sans-serif; max-width: 480px; margin: 0 auto; color: #302F2B;">
+  <h2 style="color: #2C4A3B; margin-bottom: 4px;">Renovin.</h2>
+  <p style="margin-top: 0; font-size: 12px; color: #6B6B6B;">Konfirmasi perubahan email</p>
+
+  <p>Halo,</p>
+  <p>
+    Kami menerima permintaan untuk mengganti email akun Renovin dari
+    <strong>{{ .Email }}</strong> menjadi <strong>{{ .NewEmail }}</strong>.
+  </p>
+
+  <p style="margin: 28px 0;">
+    <a
+      href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=email_change&next=/workplace/pengaturan"
+      style="background: #2C4A3B; color: #FFFFFF; padding: 12px 20px; border-radius: 6px; text-decoration: none; display: inline-block;"
+    >Konfirmasi perubahan email</a>
+  </p>
+
+  <p style="font-size: 13px; color: #6B6B6B;">
+    Link ini hanya bisa dipakai sekali dan akan kedaluwarsa. Kalau Anda tidak merasa meminta
+    perubahan email, abaikan email ini. Email akun Anda tidak akan berubah.
+  </p>
+</div>

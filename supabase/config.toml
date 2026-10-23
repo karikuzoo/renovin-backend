@@ -255,6 +255,12 @@ otp_expiry = 3600
 subject = "Atur ulang kata sandi Renovin"
 content_path = "./supabase/templates/recovery.html"
 
+# Email konfirmasi ganti email (dikirim ke alamat lama & baru). Untuk cloud, salin
+# isinya ke Dashboard -> Authentication -> Emails -> Change Email Address.
+[auth.email.template.email_change]
+subject = "Konfirmasi perubahan email akun Renovin"
+content_path = "./supabase/templates/email_change.html"
+
 # Uncomment to customize notification email template
 # [auth.email.notification.password_changed]
 # enabled = true
