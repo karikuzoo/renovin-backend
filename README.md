@@ -15,6 +15,7 @@ File (foto, aset katalog, PDF) disimpan di **Supabase Storage** (bucket `catalog
   - Pindah penanggung jawab pesanan, fungsi `assign_project`: [docs/contract-assign-project.md](docs/contract-assign-project.md)
   - Pengaturan studio (profil, lokal, pajak, logo): [docs/contract-pengaturan-studio.md](docs/contract-pengaturan-studio.md)
   - Ganti email login (staff lewat tim IT, customer dari aplikasi, sinkron ke `profiles`): [docs/contract-ganti-email.md](docs/contract-ganti-email.md)
+  - Persetujuan RAB & konfirmasi final (super admin): [docs/contract-persetujuan-rab.md](docs/contract-persetujuan-rab.md)
 
 ## Struktur
 
