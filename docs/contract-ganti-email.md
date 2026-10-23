@@ -1,79 +1,93 @@
-# Kontrak FE: ganti email login
+# Kontrak: ganti email login
 
-Dipakai halaman **Pengaturan** (`renovin-web/app/workplace/pengaturan`), di kartu **Profil admin** pada isian "Email admin". Nantinya juga bisa dipakai aplikasi Android untuk customer.
+Siapa yang boleh mengganti email, dan bagaimana caranya, **berbeda untuk staff dan customer**:
+
+| Akun | Dibuat oleh | Ganti email |
+|---|---|---|
+| **Super admin & admin** (web admin) | Tim IT, lewat Supabase Dashboard | **Hanya tim IT**, lewat Supabase Dashboard. Di web, email admin **hanya bisa dibaca** |
+| **Customer** (aplikasi Android) | Customer sendiri, daftar di aplikasi | Customer sendiri dari aplikasi, dengan konfirmasi email (lihat bawah) |
 
 Kontrak data web admin lainnya: lihat daftar di README repo backend.
 
-## Alur
+## Sinkron otomatis ke `profiles` (berlaku untuk semua akun)
+
+Email login ada di **Supabase Auth** (`auth.users`), sedangkan email yang tampil di web/aplikasi (halaman Klien, Pesanan, Pengaturan) ada di **`profiles.email`**.
+
+Trigger database `on_auth_user_email_changed` (migration 014) menyalin email baru ke `profiles` **setiap kali email login berubah**, dari jalur mana pun: Dashboard, aplikasi, atau API. FE **tidak perlu** dan **tidak bisa** mengubah `profiles.email`, karena kolomnya dikunci.
+
+Setiap perubahan `profiles` juga tercatat di `audit_logs`, berisi nilai lama, nilai baru, dan waktu perubahan.
+
+## Staff: ganti email oleh tim IT
+
+**Kenapa staff tidak bisa mengganti sendiri?** Supaya akun studio tidak bisa dipindahkan ke email pribadi oleh admin yang memegangnya. Konfirmasi dua email dari Supabase tidak mencegah hal ini, karena admin itu sendiri yang memegang email lama.
+
+**Langkah (tim IT):**
+
+1. Supabase Dashboard → project yang sesuai → **Authentication → Users**
+2. Cari akun staff, lalu buka detailnya dan ubah email-nya
+3. `profiles.email` ikut berubah otomatis. Cek di **Table Editor → `profiles`**
+
+Di web admin (`app/workplace/pengaturan`), isian "Email admin" hanya bisa dibaca, dengan keterangan *"Email dipakai untuk masuk dan dikelola tim IT."*
+
+## Customer: ganti email dari aplikasi Android
+
+> Dipakai saat aplikasi Android dikembangkan. Belum ada di web.
+
+### Alur
 
 ```
-Pengaturan ─► supabase.auth.updateUser({ email: baru })
-                 │  email BELUM berubah; Supabase mengirim email konfirmasi
-                 ├─► ke email LAMA  ─ klik link ─┐
-                 └─► ke email BARU  ─ klik link ─┤  (keduanya wajib diklik, "Secure email change")
-                                                 ▼
-         renovin-web /auth/confirm?token_hash=…&type=email_change&next=/workplace/pengaturan
-                 │  verifikasi token di server
-                 ▼
-         auth.users.email berubah ─► trigger database ─► profiles.email ikut berubah
+Aplikasi ─► supabase.auth.updateUser({ email: baru })
+               │  email BELUM berubah; Supabase mengirim email konfirmasi
+               ├─► ke email LAMA  ─ klik link ─┐
+               └─► ke email BARU  ─ klik link ─┤  (keduanya wajib, "Secure email change")
+                                               ▼
+               link konfirmasi (token_hash, type=email_change)
+                                               ▼
+       auth.users.email berubah ─► trigger ─► profiles.email ikut berubah
 ```
 
-- Email login **tidak langsung berubah** setelah `updateUser`. Email baru baru aktif setelah **link di email lama dan email baru sama-sama diklik**. Ini setelan bawaan Supabase ("Secure email change"), supaya orang yang meminjam laptop yang sedang login tidak bisa memindahkan akun ke email miliknya.
-- `profiles.email` (yang tampil di halaman Klien, Pesanan, dan Pengaturan) diperbarui **otomatis oleh database**. FE tidak perlu mengubah `profiles`, dan memang tidak bisa, karena kolom `email` dikunci.
+Email login **tidak langsung berubah** setelah `updateUser`. Email baru baru aktif setelah link di **email lama dan email baru** sama-sama diklik.
 
-## Contoh pemanggilan
+### Contoh pemanggilan
 
 ```ts
-import { createClient } from "@/lib/supabase/client";
-
-const supabase = createClient();
-
 const { error } = await supabase.auth.updateUser({ email: emailBaru.trim() });
-if (error) {
-  // tampilkan error.message, misalnya email sudah dipakai akun lain
-} else {
-  // tampilkan: "Link konfirmasi sudah dikirim ke email lama dan email baru.
-  //            Email baru aktif setelah kedua link diklik."
+if (!error) {
+  // "Link konfirmasi sudah dikirim ke email lama dan email baru.
+  //  Email baru aktif setelah kedua link diklik."
 }
-```
 
-**Menampilkan status "menunggu konfirmasi":** selama belum dikonfirmasi, `user.new_email` berisi email tujuan:
-
-```ts
+// Status menunggu konfirmasi
 const { data: { user } } = await supabase.auth.getUser();
-if (user?.new_email) {
-  // tampilkan: "Menunggu konfirmasi ke {user.new_email}"
-}
+user?.new_email; // email tujuan selama belum dikonfirmasi, null kalau sudah selesai
 ```
 
-## Setelah link diklik
+Validasi sebelum memanggil: format email, dan email baru tidak boleh sama dengan email sekarang. Error dari Supabase (email sudah terdaftar, terlalu sering meminta, dan sebagainya) bisa langsung ditampilkan dari `error.message`.
 
-Link di email mengarah ke `/auth/confirm?token_hash=…&type=email_change&next=/workplace/pengaturan`. Route `app/auth/confirm/route.ts` yang sudah ada **langsung bisa dipakai**: untuk tipe selain `recovery`, ia memverifikasi token lalu mengarahkan ke `next`.
+### ⚠️ Yang perlu disiapkan bersama tim Android
 
-- Link **pertama** yang diklik (lama atau baru) hanya mencatat konfirmasi itu. Email **belum** berubah.
-- Link **kedua** yang diklik mengubah email.
+Template email saat ini (`supabase/templates/email_change.html`) mengarahkan link ke **web admin**:
 
-Saran tampilan: di halaman Pengaturan, panggil ulang `supabase.auth.getUser()` saat halaman dibuka. Kalau `new_email` sudah kosong dan `email` sudah berganti, berarti perubahan berhasil.
+```
+{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=email_change&next=/workplace/pengaturan
+```
 
-## Validasi di FE (sebelum memanggil)
+Untuk customer, link ini **perlu diganti** sebelum fitur dipakai di aplikasi. Pilihannya:
+- **Deep link** ke aplikasi, misalnya `renovin://auth/confirm?token_hash=…&type=email_change`. Aplikasi memanggil `supabase.auth.verifyOtp({ type: "email_change", token_hash })`
+- Atau halaman web publik sederhana, misalnya `/konfirmasi-email`, yang memverifikasi token lalu menampilkan "Email berhasil dikonfirmasi, silakan kembali ke aplikasi"
 
-| Cek | Pesan |
-|---|---|
-| Format email salah | "Format email tidak valid" |
-| Sama dengan email sekarang | "Email baru sama dengan email sekarang" |
+Karena template berlaku untuk **semua akun**, dan staff memang tidak memakai alur ini lagi, template cukup diubah ke tujuan untuk customer.
 
-Error dari Supabase (misalnya email sudah terdaftar, atau terlalu sering meminta) bisa langsung ditampilkan dari `error.message`.
+## Setup Supabase (sekali per project)
 
-## Setup (sekali per project Supabase, oleh backend)
+1. **Authentication → Emails → Change Email Address**: subject `Konfirmasi perubahan email akun Renovin`, body dari `supabase/templates/email_change.html`. ✅ Sudah dipasang di `renovin-dev`
+2. **Authentication → Providers → Email**:
+   - **Secure email change**: aktif (bawaan)
+   - **Confirm email**: **aktif**, supaya customer yang mendaftar sendiri harus memverifikasi emailnya. Kalau tidak aktif, orang bisa mendaftar dengan email asal-asalan
+3. Email dikirim lewat Gmail SMTP yang sama dengan lupa kata sandi (lihat `docs/lupa-password.md`)
 
-1. **Dashboard → Authentication → Emails → Change Email Address**
-   - Subject: `Konfirmasi perubahan email akun Renovin`
-   - Body: salin seluruh isi `supabase/templates/email_change.html`
-2. **Dashboard → Authentication → Providers → Email**: pastikan **Secure email change** aktif (bawaan: aktif).
-3. Email dikirim lewat Gmail SMTP yang sama dengan email lupa kata sandi (lihat `docs/lupa-password.md`).
+## Cara mengetes
 
-## Cara mengetes tanpa email baru
+Gmail mengirim email untuk `nama+apa-saja@gmail.com` ke kotak masuk `nama@gmail.com`. Contohnya, akun customer uji dengan email Gmail asli bisa diganti ke `nama+tes@gmail.com`, dan kedua email konfirmasi akan masuk ke kotak masuk yang sama.
 
-Gmail mengirim email untuk `nama+apa-saja@gmail.com` ke kotak masuk `nama@gmail.com`. Jadi akun `superadmin.simpen@gmail.com` bisa dites dengan mengganti ke `superadmin.simpen+tes@gmail.com`. Kedua email konfirmasi akan masuk ke kotak masuk yang sama. Setelah tes, ganti kembali ke email semula dengan cara yang sama.
-
-Akun seed `@renovin.test` **tidak bisa** dipakai untuk tes ini, karena domain itu tidak bisa menerima email.
+Akun seed `@renovin.test` **tidak bisa** dipakai, karena domain itu tidak menerima email.
