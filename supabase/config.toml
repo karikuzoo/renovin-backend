@@ -431,3 +431,9 @@ enabled = true
 [functions.request-password-reset]
 enabled = true
 verify_jwt = false
+
+# Laporan PDF RAB: dipanggil staff yang login. Gateway tidak memverifikasi JWT;
+# function sendiri memverifikasi lewat auth.getUser() dan cek role staff.
+[functions.generate-report]
+enabled = true
+verify_jwt = false
