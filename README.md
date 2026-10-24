@@ -17,6 +17,7 @@ File (foto, aset katalog, PDF) disimpan di **Supabase Storage** (bucket `catalog
   - Ganti email login (staff lewat tim IT, customer dari aplikasi, sinkron ke `profiles`): [docs/contract-ganti-email.md](docs/contract-ganti-email.md)
   - Persetujuan RAB & konfirmasi final (super admin): [docs/contract-persetujuan-rab.md](docs/contract-persetujuan-rab.md)
   - Notifikasi dalam aplikasi (lonceng, realtime): [docs/contract-notifikasi.md](docs/contract-notifikasi.md)
+  - Laporan PDF RAB & selesaikan pesanan (edge function `generate-report`): [docs/contract-laporan-pdf.md](docs/contract-laporan-pdf.md)
 
 ## Struktur
 
