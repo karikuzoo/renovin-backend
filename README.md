@@ -19,6 +19,7 @@ File (foto, aset katalog, PDF) disimpan di **Supabase Storage** (bucket `catalog
   - Notifikasi dalam aplikasi (lonceng, realtime): [docs/contract-notifikasi.md](docs/contract-notifikasi.md)
   - Laporan PDF RAB & selesaikan pesanan (edge function `generate-report`): [docs/contract-laporan-pdf.md](docs/contract-laporan-pdf.md)
   - Katalog bahan (status terbit, merek, spesifikasi, ketersediaan, harga internal, gambar): [docs/contract-katalog.md](docs/contract-katalog.md)
+  - Tim studio (daftar admin & beban kerja dari `profiles` + `admin_orders`, tanpa view baru): [docs/contract-tim.md](docs/contract-tim.md)
 
 ## Struktur
 
