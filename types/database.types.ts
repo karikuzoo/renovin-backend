@@ -511,6 +511,9 @@ export type Database = {
           active: boolean
           asset_file_id: string | null
           asset_url: string | null
+          availability: Database["public"]["Enums"]["product_availability"]
+          availability_note: string | null
+          brand: string | null
           category_id: string
           color_hex: string | null
           color_name: string | null
@@ -525,6 +528,8 @@ export type Database = {
           name: string
           price_customer: number
           sku: string
+          spec: string | null
+          status: Database["public"]["Enums"]["catalog_status"]
           type: Database["public"]["Enums"]["product_type"]
           unit: string
           updated_at: string
@@ -534,6 +539,9 @@ export type Database = {
           active?: boolean
           asset_file_id?: string | null
           asset_url?: string | null
+          availability?: Database["public"]["Enums"]["product_availability"]
+          availability_note?: string | null
+          brand?: string | null
           category_id: string
           color_hex?: string | null
           color_name?: string | null
@@ -548,6 +556,8 @@ export type Database = {
           name: string
           price_customer: number
           sku: string
+          spec?: string | null
+          status: Database["public"]["Enums"]["catalog_status"]
           type: Database["public"]["Enums"]["product_type"]
           unit: string
           updated_at?: string
@@ -557,6 +567,9 @@ export type Database = {
           active?: boolean
           asset_file_id?: string | null
           asset_url?: string | null
+          availability?: Database["public"]["Enums"]["product_availability"]
+          availability_note?: string | null
+          brand?: string | null
           category_id?: string
           color_hex?: string | null
           color_name?: string | null
@@ -571,6 +584,8 @@ export type Database = {
           name?: string
           price_customer?: number
           sku?: string
+          spec?: string | null
+          status?: Database["public"]["Enums"]["catalog_status"]
           type?: Database["public"]["Enums"]["product_type"]
           unit?: string
           updated_at?: string
@@ -1666,10 +1681,12 @@ export type Database = {
     }
     Enums: {
       approval_decision: "approved" | "correction" | "rejected"
+      catalog_status: "draft" | "published" | "archived"
       client_status: "active" | "new" | "done" | "inactive"
       conversation_status: "open" | "closed"
       measurement_area_type: "wall" | "floor" | "ceiling" | "other"
       order_status_group: "new" | "in_progress" | "done" | "rejected"
+      product_availability: "available" | "indent" | "out_of_stock"
       product_type: "paint" | "furniture" | "material" | "other"
       project_status:
         | "draft"
@@ -1815,10 +1832,12 @@ export const Constants = {
   public: {
     Enums: {
       approval_decision: ["approved", "correction", "rejected"],
+      catalog_status: ["draft", "published", "archived"],
       client_status: ["active", "new", "done", "inactive"],
       conversation_status: ["open", "closed"],
       measurement_area_type: ["wall", "floor", "ceiling", "other"],
       order_status_group: ["new", "in_progress", "done", "rejected"],
+      product_availability: ["available", "indent", "out_of_stock"],
       product_type: ["paint", "furniture", "material", "other"],
       project_status: [
         "draft",

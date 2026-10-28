@@ -145,6 +145,36 @@ insert into public.product_internal_prices (product_id, price_internal, updated_
   ('20000000-0000-4000-a000-000000000022',  105000, '00000000-0000-4000-a000-000000000002'),
   ('20000000-0000-4000-a000-000000000023',   70000, '00000000-0000-4000-a000-000000000002');
 
+-- Merek, spesifikasi, ketersediaan (migration 015) + 1 draft & 1 habis
+update public.products p set brand = v.brand, spec = v.spec, availability = v.availability::public.product_availability, availability_note = v.note
+from (values
+  ('CAT-001',  'Renovin Select',  'Matte · 1 m² per 0,1 L',         'available',    null),
+  ('CAT-002',  'Renovin Select',  'Matte · 1 m² per 0,1 L',         'available',    null),
+  ('CAT-003',  'Renovin Select',  'Matte · 1 m² per 0,1 L',         'indent',       '3–5 hari'),
+  ('CAT-004',  'Renovin Select',  'Matte · 1 m² per 0,1 L',         'available',    null),
+  ('SOFA-001', 'Kayu Nusa',       '200 × 85 × 80 cm · linen',       'available',    null),
+  ('SOFA-002', 'Kayu Nusa',       '280 × 180 × 82 cm · modular',    'indent',       '2 minggu'),
+  ('MEJA-001', 'Jati Prima',      '100 × 55 × 45 cm · jati solid',  'available',    null),
+  ('MEJA-002', 'Jati Prima',      '140 × 70 × 75 cm · kayu solid',  'available',    null),
+  ('RAK-001',  'Kayu Nusa',       '80 × 30 × 180 cm · 5 susun',     'available',    null),
+  ('LMR-001',  'Kayu Nusa',       '150 × 60 × 200 cm · 3 pintu',    'out_of_stock', 'Restok akhir bulan'),
+  ('KRS-001',  'Rotan Cirebon',   '50 × 52 × 80 cm · rotan alami',  'available',    null),
+  ('MAT-001',  'Jayaboard',       '9 mm · 120 × 240 cm',            'available',    null),
+  ('MAT-002',  'Roman',           '60 × 60 cm · matte krem',        'available',    null),
+  ('MAT-003',  'Mortar Utama',    'Mortar instan · 25 kg',          'indent',       '3–5 hari')
+) as v(sku, brand, spec, availability, note)
+where p.sku = v.sku;
+
+insert into public.products (
+  id, category_id, type, sku, name, unit, price_customer, brand, spec, status, image_url, created_by
+) values
+  ('20000000-0000-4000-a000-000000000024', '10000000-0000-4000-a000-000000000006', 'material', 'MAT-004',
+   'Hollow Galvanis 4x4', 'batang', 48000, 'Renovin Select', '4 × 4 cm · panjang 4 m · tebal 0,4 mm', 'draft',
+   'https://placehold.co/400x300/png?text=Hollow+Galvanis', '00000000-0000-4000-a000-000000000002');
+
+insert into public.product_internal_prices (product_id, price_internal, updated_by) values
+  ('20000000-0000-4000-a000-000000000024', 36000, '00000000-0000-4000-a000-000000000002');
+
 insert into public.service_rates (code, name, calc_type, applies_to, rate) values
   ('JASA-CAT',   'Jasa pengecatan',                 'per_m2', 'paint', 25000),
   ('JASA-ANTAR', 'Jasa pengiriman & pemasangan',    'flat',   null,    150000);
