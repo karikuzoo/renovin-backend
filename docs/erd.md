@@ -59,6 +59,7 @@ erDiagram
 | Katalog (produk aktif) | Baca | Baca + kelola | Baca + kelola |
 | Harga internal | ✗ | ✓ | ✓ |
 | RAB & snapshot | ✗ | ✓ (edit sesuai status) | ✓ |
+| Skema pembayaran | Baca miliknya, minta skema | Baca + tetapkan + catat bayar | Sama |
 | Approval | ✗ | Baca | Baca + memutuskan |
 | Laporan PDF | Miliknya | ✓ | ✓ |
 | Chat | Miliknya | Semua | Semua |
@@ -88,6 +89,7 @@ Path yang folder pertamanya bukan `project_id` yang valid otomatis ditolak di `r
 | Function | Login? | Kegunaan |
 |---|---|---|
 | `request-password-reset` | Tidak | Kirim email reset password **hanya** untuk admin & super admin. Jawaban selalu sama. Detail: [lupa-password.md](lupa-password.md) |
+| `generate-report` | Ya (staff) | Buat laporan PDF dari snapshot final (termasuk skema pembayaran), simpan di bucket `reports`. Detail: [contract-laporan-pdf.md](contract-laporan-pdf.md) |
 
 ## Fungsi yang dipanggil dari web/android (RPC)
 
@@ -95,6 +97,11 @@ Path yang folder pertamanya bukan `project_id` yang valid otomatis ditolak di `r
 |---|---|---|
 | `change_project_status(p_project_id, p_to_status, p_note)` | Semua role | Satu-satunya cara mengubah status project |
 | `calculate_rab(p_project_id)` | Admin, super admin | Hitung / hitung ulang RAB otomatis (baris manual dipertahankan) |
+| `assign_project(p_project_id, p_admin_id)` | Admin, super admin | Pindah penanggung jawab pesanan ([contract-assign-project.md](contract-assign-project.md)) |
+| `dashboard_summary(p_from, p_to)` | Admin, super admin | Angka ringkasan dashboard ([contract-dashboard-summary.md](contract-dashboard-summary.md)) |
+| `request_payment_scheme(p_project_id, p_scheme, p_note)` | Customer | Minta skema pembayaran ([contract-pembayaran.md](contract-pembayaran.md)) |
+| `save_payment_plan(p_project_id, p_scheme, p_installments)` | Admin, super admin | Tetapkan skema & baris pembayaran |
+| `set_installment_paid(p_installment_id, p_paid, p_paid_at, p_note)` | Admin, super admin | Catat / batalkan pembayaran yang diterima |
 | `set_user_role(p_user_id, p_role)` | Super admin | Ubah role user |
 | `my_role()`, `is_staff()`, `is_super_admin()` | Semua | Cek role user yang sedang login |
 | `can_read_project(id)`, `can_edit_rab(id)` | Semua | Cek hak akses (untuk menampilkan/menyembunyikan tombol di UI) |
