@@ -21,6 +21,7 @@ File (foto, aset katalog, PDF) disimpan di **Supabase Storage** (bucket `catalog
   - Katalog bahan (status terbit, merek, spesifikasi, ketersediaan, harga internal, gambar): [docs/contract-katalog.md](docs/contract-katalog.md)
   - Tim studio (daftar admin & beban kerja dari `profiles` + `admin_orders`, tanpa view baru): [docs/contract-tim.md](docs/contract-tim.md)
   - Skema pembayaran (DP / termin / progress, pencatatan tanpa transaksi): [docs/contract-pembayaran.md](docs/contract-pembayaran.md)
+  - Tarif jasa (dikelola super admin, dipakai RAB): [docs/contract-tarif-jasa.md](docs/contract-tarif-jasa.md)
 
 ## Struktur
 
