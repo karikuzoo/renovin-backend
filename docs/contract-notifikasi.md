@@ -37,6 +37,7 @@ Tabel `notifications` berisi satu baris per notifikasi **per penerima**.
 | `approval_rejected` | Sama | Super admin menolak RAB. `body` berisi alasannya |
 | `project_assigned` | Admin tujuan | Penanggung jawab pesanan dipindahkan ke dia |
 | `chat_opened` | Semua admin | Customer membuka chat baru |
+| `chat_message` | Admin penanggung jawab pesanan (atau semua admin kalau belum ada) | Customer mengirim pesan lanjutan di chat yang sudah ada (lihat [contract-chat.md](contract-chat.md)) |
 | `report_ready` | **Customer** | Laporan PDF pesanannya siap (untuk Android) |
 | `chat_reply` | **Customer** | Admin membalas chat (untuk Android) |
 | `payment_recorded` | **Customer** | Admin mencatat pembayaran yang diterima, misalnya "Pembayaran Termin 1 sudah tercatat" (untuk Android, lihat [contract-pembayaran.md](contract-pembayaran.md)) |
