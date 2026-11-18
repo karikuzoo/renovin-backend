@@ -117,6 +117,13 @@ export type Database = {
             foreignKeyName: "approvals_project_id_fkey"
             columns: ["project_id"]
             isOneToOne: false
+            referencedRelation: "order_payment_summary"
+            referencedColumns: ["project_id"]
+          },
+          {
+            foreignKeyName: "approvals_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
             referencedRelation: "projects"
             referencedColumns: ["id"]
           },
@@ -223,6 +230,13 @@ export type Database = {
             foreignKeyName: "conversations_project_id_fkey"
             columns: ["project_id"]
             isOneToOne: false
+            referencedRelation: "order_payment_summary"
+            referencedColumns: ["project_id"]
+          },
+          {
+            foreignKeyName: "conversations_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
             referencedRelation: "projects"
             referencedColumns: ["id"]
           },
@@ -299,6 +313,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "admin_orders"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "furniture_placements_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "order_payment_summary"
+            referencedColumns: ["project_id"]
           },
           {
             foreignKeyName: "furniture_placements_project_id_fkey"
@@ -411,6 +432,13 @@ export type Database = {
             foreignKeyName: "notifications_project_id_fkey"
             columns: ["project_id"]
             isOneToOne: false
+            referencedRelation: "order_payment_summary"
+            referencedColumns: ["project_id"]
+          },
+          {
+            foreignKeyName: "notifications_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
             referencedRelation: "projects"
             referencedColumns: ["id"]
           },
@@ -424,6 +452,165 @@ export type Database = {
           {
             foreignKeyName: "notifications_user_id_fkey"
             columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      payment_installments: {
+        Row: {
+          amount: number | null
+          created_at: string
+          due_date: string | null
+          id: string
+          label: string
+          milestone: string | null
+          paid_at: string | null
+          paid_note: string | null
+          paid_recorded_at: string | null
+          paid_recorded_by: string | null
+          percent: number
+          project_id: string
+          seq: number
+          updated_at: string
+        }
+        Insert: {
+          amount?: number | null
+          created_at?: string
+          due_date?: string | null
+          id?: string
+          label: string
+          milestone?: string | null
+          paid_at?: string | null
+          paid_note?: string | null
+          paid_recorded_at?: string | null
+          paid_recorded_by?: string | null
+          percent: number
+          project_id: string
+          seq: number
+          updated_at?: string
+        }
+        Update: {
+          amount?: number | null
+          created_at?: string
+          due_date?: string | null
+          id?: string
+          label?: string
+          milestone?: string | null
+          paid_at?: string | null
+          paid_note?: string | null
+          paid_recorded_at?: string | null
+          paid_recorded_by?: string | null
+          percent?: number
+          project_id?: string
+          seq?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_installments_paid_recorded_by_fkey"
+            columns: ["paid_recorded_by"]
+            isOneToOne: false
+            referencedRelation: "admin_clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payment_installments_paid_recorded_by_fkey"
+            columns: ["paid_recorded_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payment_installments_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "payment_plans"
+            referencedColumns: ["project_id"]
+          },
+        ]
+      }
+      payment_plans: {
+        Row: {
+          created_at: string
+          locked_at: string | null
+          project_id: string
+          requested_at: string | null
+          requested_note: string | null
+          requested_scheme: Database["public"]["Enums"]["payment_scheme"] | null
+          scheme: Database["public"]["Enums"]["payment_scheme"] | null
+          total_amount: number | null
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          locked_at?: string | null
+          project_id: string
+          requested_at?: string | null
+          requested_note?: string | null
+          requested_scheme?:
+            | Database["public"]["Enums"]["payment_scheme"]
+            | null
+          scheme?: Database["public"]["Enums"]["payment_scheme"] | null
+          total_amount?: number | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          locked_at?: string | null
+          project_id?: string
+          requested_at?: string | null
+          requested_note?: string | null
+          requested_scheme?:
+            | Database["public"]["Enums"]["payment_scheme"]
+            | null
+          scheme?: Database["public"]["Enums"]["payment_scheme"] | null
+          total_amount?: number | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_plans_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: true
+            referencedRelation: "admin_clients"
+            referencedColumns: ["related_order_id"]
+          },
+          {
+            foreignKeyName: "payment_plans_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: true
+            referencedRelation: "admin_orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payment_plans_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: true
+            referencedRelation: "order_payment_summary"
+            referencedColumns: ["project_id"]
+          },
+          {
+            foreignKeyName: "payment_plans_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: true
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payment_plans_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "admin_clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payment_plans_updated_by_fkey"
+            columns: ["updated_by"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
@@ -701,6 +888,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "admin_orders"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_status_history_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "order_payment_summary"
+            referencedColumns: ["project_id"]
           },
           {
             foreignKeyName: "project_status_history_project_id_fkey"
@@ -990,6 +1184,13 @@ export type Database = {
             foreignKeyName: "rab_snapshots_project_id_fkey"
             columns: ["project_id"]
             isOneToOne: false
+            referencedRelation: "order_payment_summary"
+            referencedColumns: ["project_id"]
+          },
+          {
+            foreignKeyName: "rab_snapshots_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
             referencedRelation: "projects"
             referencedColumns: ["id"]
           },
@@ -1086,6 +1287,13 @@ export type Database = {
             foreignKeyName: "rabs_project_id_fkey"
             columns: ["project_id"]
             isOneToOne: true
+            referencedRelation: "order_payment_summary"
+            referencedColumns: ["project_id"]
+          },
+          {
+            foreignKeyName: "rabs_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: true
             referencedRelation: "projects"
             referencedColumns: ["id"]
           },
@@ -1161,6 +1369,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "admin_orders"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reports_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "order_payment_summary"
+            referencedColumns: ["project_id"]
           },
           {
             foreignKeyName: "reports_project_id_fkey"
@@ -1260,6 +1475,13 @@ export type Database = {
             foreignKeyName: "room_measurements_project_id_fkey"
             columns: ["project_id"]
             isOneToOne: false
+            referencedRelation: "order_payment_summary"
+            referencedColumns: ["project_id"]
+          },
+          {
+            foreignKeyName: "room_measurements_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
             referencedRelation: "projects"
             referencedColumns: ["id"]
           },
@@ -1326,6 +1548,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "admin_orders"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "room_photos_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "order_payment_summary"
+            referencedColumns: ["project_id"]
           },
           {
             foreignKeyName: "room_photos_project_id_fkey"
@@ -1445,6 +1674,13 @@ export type Database = {
             foreignKeyName: "wall_paints_project_id_fkey"
             columns: ["project_id"]
             isOneToOne: false
+            referencedRelation: "order_payment_summary"
+            referencedColumns: ["project_id"]
+          },
+          {
+            foreignKeyName: "wall_paints_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
             referencedRelation: "projects"
             referencedColumns: ["id"]
           },
@@ -1536,6 +1772,22 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      order_payment_summary: {
+        Row: {
+          installment_count: number | null
+          locked_at: string | null
+          next_due_date: string | null
+          next_label: string | null
+          paid_amount: number | null
+          paid_count: number | null
+          payment_status: string | null
+          project_id: string | null
+          requested_scheme: Database["public"]["Enums"]["payment_scheme"] | null
+          scheme: Database["public"]["Enums"]["payment_scheme"] | null
+          total_amount: number | null
+        }
+        Relationships: []
       }
     }
     Functions: {
@@ -1652,6 +1904,86 @@ export type Database = {
         Args: { p_status: Database["public"]["Enums"]["project_status"] }
         Returns: Database["public"]["Enums"]["order_status_group"]
       }
+      request_payment_scheme: {
+        Args: {
+          p_note?: string
+          p_project_id: string
+          p_scheme: Database["public"]["Enums"]["payment_scheme"]
+        }
+        Returns: {
+          created_at: string
+          locked_at: string | null
+          project_id: string
+          requested_at: string | null
+          requested_note: string | null
+          requested_scheme: Database["public"]["Enums"]["payment_scheme"] | null
+          scheme: Database["public"]["Enums"]["payment_scheme"] | null
+          total_amount: number | null
+          updated_at: string
+          updated_by: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "payment_plans"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      save_payment_plan: {
+        Args: {
+          p_installments: Json
+          p_project_id: string
+          p_scheme: Database["public"]["Enums"]["payment_scheme"]
+        }
+        Returns: {
+          created_at: string
+          locked_at: string | null
+          project_id: string
+          requested_at: string | null
+          requested_note: string | null
+          requested_scheme: Database["public"]["Enums"]["payment_scheme"] | null
+          scheme: Database["public"]["Enums"]["payment_scheme"] | null
+          total_amount: number | null
+          updated_at: string
+          updated_by: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "payment_plans"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      set_installment_paid: {
+        Args: {
+          p_installment_id: string
+          p_note?: string
+          p_paid: boolean
+          p_paid_at?: string
+        }
+        Returns: {
+          amount: number | null
+          created_at: string
+          due_date: string | null
+          id: string
+          label: string
+          milestone: string | null
+          paid_at: string | null
+          paid_note: string | null
+          paid_recorded_at: string | null
+          paid_recorded_by: string | null
+          percent: number
+          project_id: string
+          seq: number
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "payment_installments"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       set_user_role: {
         Args: {
           p_role: Database["public"]["Enums"]["user_role"]
@@ -1686,6 +2018,7 @@ export type Database = {
       conversation_status: "open" | "closed"
       measurement_area_type: "wall" | "floor" | "ceiling" | "other"
       order_status_group: "new" | "in_progress" | "done" | "rejected"
+      payment_scheme: "full" | "dp" | "termin" | "progress"
       product_availability: "available" | "indent" | "out_of_stock"
       product_type: "paint" | "furniture" | "material" | "other"
       project_status:
@@ -1837,6 +2170,7 @@ export const Constants = {
       conversation_status: ["open", "closed"],
       measurement_area_type: ["wall", "floor", "ceiling", "other"],
       order_status_group: ["new", "in_progress", "done", "rejected"],
+      payment_scheme: ["full", "dp", "termin", "progress"],
       product_availability: ["available", "indent", "out_of_stock"],
       product_type: ["paint", "furniture", "material", "other"],
       project_status: [
