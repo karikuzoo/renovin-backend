@@ -39,6 +39,7 @@ Tabel `notifications` berisi satu baris per notifikasi **per penerima**.
 | `chat_opened` | Semua admin | Customer membuka chat baru |
 | `report_ready` | **Customer** | Laporan PDF pesanannya siap (untuk Android) |
 | `chat_reply` | **Customer** | Admin membalas chat (untuk Android) |
+| `payment_recorded` | **Customer** | Admin mencatat pembayaran yang diterima, misalnya "Pembayaran Termin 1 sudah tercatat" (untuk Android, lihat [contract-pembayaran.md](contract-pembayaran.md)) |
 
 Tipe baru bisa bertambah nanti. FE sebaiknya menampilkan `title` dan `body` apa adanya, dan memakai `type` **hanya untuk memilih ikon atau warna**, dengan ikon umum sebagai cadangan.
 
