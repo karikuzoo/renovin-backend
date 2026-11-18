@@ -16,7 +16,7 @@
 // verify_jwt = false di config.toml: login diverifikasi sendiri lewat auth.getUser().
 
 import { createClient } from 'npm:@supabase/supabase-js@2';
-import { buildReportPdf, type SnapshotData, type StudioInfo } from './pdf.ts';
+import { buildReportPdf, type PaymentPlanInput, type SnapshotData, type StudioInfo } from './pdf.ts';
 
 const STAFF_ROLES = ['admin', 'super_admin'];
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -101,9 +101,15 @@ Deno.serve(async (req) => {
     return json(req, { error: 'Laporan hanya bisa dibuat setelah RAB dikonfirmasi final' }, 409);
   }
 
-  const [snapRes, settingsRes] = await Promise.all([
+  const [snapRes, settingsRes, planRes, installmentsRes] = await Promise.all([
     supabase.from('rab_snapshots').select('id, version, data').eq('id', project.final_snapshot_id).single(),
     supabase.from('app_settings').select('key, value').in('key', ['studio_profile', 'locale']),
+    supabase.from('payment_plans').select('scheme, locked_at').eq('project_id', project.id).maybeSingle(),
+    supabase
+      .from('payment_installments')
+      .select('label, percent, amount, due_date, milestone')
+      .eq('project_id', project.id)
+      .order('seq'),
   ]);
   if (snapRes.error || !snapRes.data) return json(req, { error: 'Snapshot final tidak ditemukan' }, 500);
 
@@ -124,6 +130,11 @@ Deno.serve(async (req) => {
       studio,
       logo: await loadLogo(studioProfile.logo_url),
       snapshot: snapRes.data.data as SnapshotData,
+      // Skema pembayaran yang sudah dikunci (pesanan lama mungkin belum punya)
+      payment:
+        planRes.data?.scheme && planRes.data.locked_at
+          ? { scheme: planRes.data.scheme as PaymentPlanInput['scheme'], installments: installmentsRes.data ?? [] }
+          : null,
       generatedAt: new Date(),
       timeZone: settings.locale?.timezone || 'Asia/Jakarta',
     });

@@ -43,10 +43,23 @@ export interface SnapshotData {
   rab_line_items: SnapshotLineItem[];
 }
 
+// Skema pembayaran yang sudah dikunci saat konfirmasi final (migration 016)
+export interface PaymentPlanInput {
+  scheme: 'full' | 'dp' | 'termin' | 'progress';
+  installments: {
+    label: string;
+    percent: number | string;
+    amount: number | string | null;
+    due_date: string | null;
+    milestone: string | null;
+  }[];
+}
+
 export interface ReportInput {
   studio: StudioInfo;
   logo?: { bytes: Uint8Array; type: 'png' | 'jpg' } | null;
   snapshot: SnapshotData;
+  payment?: PaymentPlanInput | null;
   generatedAt: Date;
   timeZone?: string;
 }
@@ -321,12 +334,43 @@ export async function buildReportPdf(input: ReportInput): Promise<Uint8Array> {
   textRight(rupiah(rab.grand_total_customer), A4[0] - M - 6, y, 11, bold, rgb(1, 1, 1));
   y -= 40;
 
+  // ---- Skema pembayaran ----------------------------------------------------
+  const payment = input.payment;
+  if (payment && payment.installments.length) {
+    const SCHEME_LABEL = { full: 'Lunas', dp: 'DP + pelunasan', termin: 'Termin', progress: 'Sesuai progres pekerjaan' };
+    ensure(40 + payment.installments.length * 20);
+    text('Skema pembayaran', M, y, 11, bold, GREEN);
+    textRight(SCHEME_LABEL[payment.scheme] ?? payment.scheme, A4[0] - M, y, 9, bold);
+    y -= 18;
+    page.drawRectangle({ x: M, y: y - 5, width, height: 18, color: SOFT });
+    text('Pembayaran', M + 6, y, 8, bold, MUTED);
+    text('Patokan', M + 150, y, 8, bold, MUTED);
+    textRight('Persen', A4[0] - M - 110, y, 8, bold, MUTED);
+    textRight('Nominal', A4[0] - M - 6, y, 8, bold, MUTED);
+    y -= 20;
+    for (const ins of payment.installments) {
+      const patokan = ins.due_date ? `Jatuh tempo ${tanggal(ins.due_date + 'T00:00:00+07:00', tz)}` : ins.milestone || '-';
+      const lines = wrap(patokan, font, 8.5, A4[0] - M - 130 - (M + 150));
+      ensure(lines.length * 11 + 10);
+      text(ins.label, M + 6, y, 8.5, bold);
+      lines.forEach((ln, i) => text(ln, M + 150, y - i * 11, 8.5));
+      textRight(`${angka(ins.percent, 2)}%`, A4[0] - M - 110, y, 8.5);
+      textRight(rupiah(ins.amount), A4[0] - M - 6, y, 8.5, bold);
+      y -= Math.max(18, lines.length * 11 + 7);
+      hline(y + 8);
+    }
+    y -= 14;
+  }
+
   // ---- Catatan -------------------------------------------------------------
   ensure(40);
   const notes = [
     'Harga sudah termasuk pajak sesuai rincian di atas.',
     'Dokumen ini dibuat dari RAB yang telah disetujui dan dikonfirmasi final oleh studio.',
   ];
+  if (payment && payment.installments.length) {
+    notes.push('Pembayaran dilakukan langsung ke studio sesuai skema di atas; aplikasi Renovin hanya mencatat.');
+  }
   for (const n of notes) {
     for (const ln of wrap(`• ${n}`, font, 8, width)) { text(ln, M, y, 8, font, MUTED); y -= 11; }
   }

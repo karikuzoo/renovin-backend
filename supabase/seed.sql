@@ -387,12 +387,53 @@ from (values
 join public.projects p on p.code = a.code
 join public.rabs r on r.project_id = p.id;
 
+-- Skema pembayaran (migration 016) — wajib ada sebelum status 'confirmed'
+insert into public.payment_plans (project_id, requested_scheme, requested_note, requested_at, scheme, updated_by)
+select p.id, v.requested::public.payment_scheme, v.note, now() - interval '20 days', v.scheme::public.payment_scheme, p.assigned_admin_id
+from (values
+  ('RNV-2610-00010', 'dp',       null,                                   'dp'),
+  ('RNV-2610-00011', 'termin',   'Kalau bisa 3 kali bayar.',             'termin'),
+  ('RNV-2610-00012', 'full',     null,                                   'full'),
+  ('RNV-2610-00013', 'progress', 'Bayar sesuai tahap pengerjaan.',       'progress'),
+  ('RNV-2610-00005', 'dp',       'DP 30% dulu, sisanya setelah selesai.', null)
+) as v(code, requested, note, scheme)
+join public.projects p on p.code = v.code;
+
+insert into public.payment_installments (project_id, seq, label, percent, due_date, milestone)
+select p.id, v.seq, v.label, v.percent, v.due, v.milestone
+from (values
+  ('RNV-2610-00010', 1, 'DP',        30.00, null::date,                null),
+  ('RNV-2610-00010', 2, 'Pelunasan', 70.00, null,                      null),
+  ('RNV-2610-00011', 1, 'Termin 1',  40.00, current_date - 5,          null),
+  ('RNV-2610-00011', 2, 'Termin 2',  30.00, current_date + 25,         null),
+  ('RNV-2610-00011', 3, 'Termin 3',  30.00, current_date + 55,         null),
+  ('RNV-2610-00012', 1, 'Pelunasan', 100.00, null,                     null),
+  ('RNV-2610-00013', 1, 'Tahap 1',   30.00, null,                      'Saat konfirmasi pesanan'),
+  ('RNV-2610-00013', 2, 'Tahap 2',   40.00, null,                      'Setelah furnitur terpasang'),
+  ('RNV-2610-00013', 3, 'Tahap 3',   30.00, null,                      'Setelah serah terima')
+) as v(code, seq, label, percent, due, milestone)
+join public.projects p on p.code = v.code;
+
 -- Snapshot final untuk project yang sudah confirmed (P10–P13)
 update public.projects set status = 'confirmed'
 where code in ('RNV-2610-00010', 'RNV-2610-00011', 'RNV-2610-00012', 'RNV-2610-00013');
 
 update public.projects set final_snapshot_id = private.create_final_snapshot(id, assigned_admin_id)
 where code in ('RNV-2610-00010', 'RNV-2610-00011', 'RNV-2610-00012', 'RNV-2610-00013');
+
+-- Pembayaran yang sudah tercatat (skema sudah dikunci saat status menjadi 'confirmed')
+update public.payment_installments i
+set paid_at = current_date - v.days, paid_note = v.note,
+    paid_recorded_by = p.assigned_admin_id, paid_recorded_at = now() - v.days * interval '1 day'
+from (values
+  ('RNV-2610-00011', 1, 6,  'Transfer BCA'),
+  ('RNV-2610-00012', 1, 22, 'Transfer Mandiri, lunas'),
+  ('RNV-2610-00013', 1, 33, 'Transfer BCA'),
+  ('RNV-2610-00013', 2, 31, 'Transfer BCA'),
+  ('RNV-2610-00013', 3, 30, 'Tunai saat serah terima')
+) as v(code, seq, days, note)
+join public.projects p on p.code = v.code
+where i.project_id = p.id and i.seq = v.seq;
 
 -- Laporan PDF (placeholder, bukan file di Storage) untuk P11–P13
 insert into public.reports (project_id, snapshot_id, pdf_url, generated_by, generated_at)
